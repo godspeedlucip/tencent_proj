@@ -239,13 +239,13 @@ def compute_is_late(checkin_submitted_at: datetime, mentor_id: str) -> bool:
         if not dl:
             return False
         submitted = checkin_submitted_at.replace(tzinfo=None) if checkin_submitted_at.tzinfo else checkin_submitted_at
-        days_until_deadline = (dl.day_of_week - submitted.weekday()) % 7
-        deadline = (submitted + timedelta(days=days_until_deadline)).replace(
+        days_since = (submitted.weekday() - dl.day_of_week) % 7
+        most_recent_deadline = (submitted - timedelta(days=days_since)).replace(
             hour=dl.hour, minute=0, second=0, microsecond=0
         )
-        if deadline < submitted:
-            deadline += timedelta(days=7)
-        return submitted > deadline
+        if most_recent_deadline > submitted:
+            most_recent_deadline -= timedelta(days=7)
+        return submitted > most_recent_deadline
     finally:
         db.close()
 

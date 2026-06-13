@@ -122,17 +122,19 @@ class BaselineRequest(BaseModel):
 
 @router.post("/{intern_id}/baseline")
 def submit_baseline(intern_id: str, req: BaselineRequest):
+    from ..services.mentor_service import submit_baseline as svc_submit_baseline
     db = SessionLocal()
     try:
         intern = db.query(Intern).filter(Intern.id == intern_id).first()
         if not intern:
             raise HTTPException(404, "Intern not found")
-        intern.baseline_scores = req.scores
-        intern.current_scores = dict(req.scores)
-        db.commit()
-        return {"id": intern.id, "status": "pending_mentor_review"}
+        mentor_id = intern.mentor_id
     finally:
         db.close()
+    result = svc_submit_baseline(mentor_id, intern_id, req.scores)
+    if result.get("error"):
+        raise HTTPException(404, result["error"])
+    return {"id": result["id"], "status": "submitted"}
 
 
 class TaskReportRequest(BaseModel):
