@@ -1,15 +1,22 @@
 import { Modal } from 'antd'
 import { useState } from 'react'
 
+const STORAGE_KEY = 'intern_energy_station_privacy_consent'
+
 export default function PrivacyModal() {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(() => !localStorage.getItem(STORAGE_KEY))
+
+  function handleAgree() {
+    localStorage.setItem(STORAGE_KEY, 'true')
+    setOpen(false)
+  }
 
   return (
     <Modal
       title="数据与隐私安全告知书"
       open={open}
-      onOk={() => setOpen(false)}
-      onCancel={() => setOpen(false)}
+      onOk={handleAgree}
+      onCancel={handleAgree}
       okText="已知晓并同意"
       cancelText="关闭"
       closable={false}
