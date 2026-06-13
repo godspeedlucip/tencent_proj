@@ -56,6 +56,24 @@ def get_weekly_report() -> dict:
 
         ai_result = generate_weekly_report_actions()
 
+        recent_signals = (
+            db.query(RiskSignal).order_by(RiskSignal.created_at.desc()).limit(10).all()
+        )
+        risk_details = [
+            {
+                "intern_id": s.intern_id,
+                "intern_name": s.intern.name if s.intern else "",
+                "level": s.level.value,
+                "triggers": s.triggers,
+                "ai_confidence": s.ai_confidence,
+                "review_status": s.review_status.value,
+            }
+            for s in recent_signals
+        ]
+
+        resolved_count = sum(1 for s in recent_signals if s.review_status == ReviewStatus.confirmed)
+        new_count = sum(1 for s in recent_signals if s.review_status == ReviewStatus.pending)
+
         return {
             "week": max((c.week for c in checkins), default=0),
             "generated_at": datetime.datetime.now().isoformat(),
@@ -64,10 +82,10 @@ def get_weekly_report() -> dict:
                 "checkin_rate": round(checkin_rate, 2),
                 "avg_task_completion": avg_task,
                 "risk_count": risk_count,
-                "new_risks_this_week": risk_count,
-                "resolved_risks_this_week": 0,
+                "new_risks_this_week": new_count,
+                "resolved_risks_this_week": resolved_count,
             },
-            "risk_details": [],
+            "risk_details": risk_details,
             "recommended_actions": ai_result.get("actions", []),
         }
     finally:
