@@ -17,12 +17,15 @@ const statusLabels: Record<string, string> = { not_started: '未开始', in_prog
 export default function TaskListModal({ mentorId, internId, internName, onClose }: Props) {
   const [tasks, setTasks] = useState<MentorInternTask[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
+    setLoading(true)
+    setError(null)
     mentors.getInternTasks(mentorId, internId)
       .then(r => setTasks(r.tasks))
-      .catch(() => {})
+      .catch((err: any) => setError(err.message || '加载失败'))
       .finally(() => setLoading(false))
   }, [mentorId, internId])
 
@@ -56,9 +59,10 @@ export default function TaskListModal({ mentorId, internId, internName, onClose 
 
   return (
     <Modal title={`${internName} 的任务`} open onCancel={onClose} footer={null} width={700}>
-      {loading ? <Spin /> : tasks.length === 0
-        ? <Alert message="暂无任务" type="info" />
-        : <Table dataSource={tasks} columns={cols} rowKey="id" pagination={false} size="small" />
+      {loading ? <Spin /> :
+        error ? <Alert message={error} type="error" /> :
+        tasks.length === 0 ? <Alert message="暂无任务" type="info" /> :
+        <Table dataSource={tasks} columns={cols} rowKey="id" pagination={false} size="small" />
       }
     </Modal>
   )

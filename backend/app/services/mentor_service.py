@@ -36,6 +36,7 @@ def get_mentor_interns(mentor_id: str) -> list[dict]:
                 "last_checkin_week": last_checkin.week if last_checkin else None,
                 "pending_feedback": pending_feedback,
                 "risk_level": intern.status.value,
+                "baseline_scores": intern.baseline_scores,
             })
         return result
     finally:
