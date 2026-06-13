@@ -1,0 +1,14 @@
+{
+  "fit_report_samples": [
+    {
+      "growth_evidence": "该实习生在8周内从被动接收任务到主动发起需求讨论，在需求分析和协作沟通两个维度上进步最为显著。目前已独立完成2个中小型需求的PRD撰写。",
+      "ai_recommendation": "high_potential",
+      "human_review_note": "导师复核：成长曲线明显，特别是在需求分析方面进步显著。同意AI判断，建议优先考虑转正。— 张哥"
+    },
+    {
+      "growth_evidence": "该实习生在基础执行层面表现稳定，但主动性和独立思路上尚未展现出突破性成长。建议延长观察期或安排更具挑战性的任务进行压力测试。",
+      "ai_recommendation": "observe",
+      "human_review_note": "导师复核：同意AI判断。该生在执行层面可靠但缺少主动性，下一步会安排独立负责一个小模块来进一步观察。— 刘姐"
+    }
+  ]
+}

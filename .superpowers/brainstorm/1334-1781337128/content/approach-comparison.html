@@ -1,0 +1,40 @@
+<h2>三种实现策略对比</h2>
+<p class="subtitle">参考 index.html 设计语言重塑「实习能量站」前端</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Ant Design 主题覆盖</h3>
+      <p>通过 Ant Design 5 的 Design Token 系统 + 额外 CSS 来实现风格迁移。修改主题色、圆角、阴影等变量，在 Card/Modal 等组件上叠加 glassmorphism 样式。</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>改动量最小，不破坏现有组件逻辑</li><li>Table/Modal/Select 等复杂组件零风险</li><li>快速出效果</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Ant Design 主题 token 覆盖有限</li><li>glassmorphism 与 Ant Design 组件内部样式冲突时难处理</li><li>视觉效果受限，难以完全达到 index.html 的质感</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>混合策略（推荐）</h3>
+      <p>保留 Ant Design 的复杂交互组件（Table、Modal、Select、Form），用 Tailwind + 自定义 CSS 重写布局外壳（Card、Statistic、页面框架），两者通过统一的 Design Token 桥接。</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>视觉效果完全自由，可实现 index.html 的玻璃态风格</li><li>Ant Design 复杂组件（表格、下拉、表单验证）继续可用</li><li>改动范围可控，按页面/组件渐进替换</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>两套样式体系共存，需注意命名空间隔离</li><li>部分 Ant Design 组件需要额外包裹层来统一风格</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>完全自定义</h3>
+      <p>移除 Ant Design 的所有视觉组件，用 Tailwind + Headless UI 或纯自定义组件替代。仅保留 antd 的底层逻辑（如表单校验）。</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>设计控制力最强，与 index.html 风格完全统一</li><li>无样式冲突，bundle 体积更小</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>工作量最大，需重写 Table（排序/筛选/分页）、Modal（焦点管理/键盘导航）、Select（搜索/多选）等</li><li>丢失 Ant Design 的无障碍和交互细节积累</li><li>对于 Demo 项目来说 ROI 偏低</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

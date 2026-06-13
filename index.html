@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>godspeedlucip - Portfolio</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #fefce8 0%, #f0f9ff 100%);
+  color: #334155;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+/* Skip link */
+.skip-link {
+  position: absolute; top: -100px; left: 16px; z-index: 200;
+  background: #f59e0b; color: #fff; padding: 8px 16px; border-radius: 4px;
+  font-weight: 600; font-size: 0.9rem;
+}
+.skip-link:focus { top: 8px; }
+
+/* Focus visible */
+:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
+
+/* Nav */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.7);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(253,230,138,0.3);
+  padding: 12px 0;
+}
+.nav-inner {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.nav-logo {
+  font-weight: 800; font-size: 1.1rem;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.nav-links { display: flex; gap: 24px; font-size: 0.9rem; }
+.nav-links a { color: #64748b; transition: color 0.2s; }
+.nav-links a:hover { color: #f59e0b; }
+
+/* Hero */
+.hero {
+  min-height: 90vh; display: flex; align-items: center; text-align: center;
+  padding: 80px 0;
+}
+.hero-title { font-size: 2.8rem; font-weight: 800; color: #1e293b; }
+.hero-name {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-subtitle { font-size: 1.2rem; color: #64748b; margin-top: 12px; }
+.hero-tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 24px; }
+.tag {
+  background: rgba(255,255,255,0.7); padding: 4px 12px; border-radius: 20px;
+  font-size: 0.85rem; color: #64748b; border: 1px solid rgba(253,230,138,0.4);
+}
+.hero-scroll-hint { margin-top: 48px; font-size: 0.85rem; color: #94a3b8; }
+.scroll-arrow { font-size: 1.5rem; }
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-arrow { animation: bounce 2s infinite; }
+}
+@keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+
+/* Section title */
+.section-title { text-align: center; font-size: 1.8rem; font-weight: 700; color: #1e293b; margin-bottom: 32px; }
+
+/* Projects Overview */
+.projects-overview { padding: 80px 0; }
+.project-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.proj-card {
+  background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-radius: 12px; padding: 28px 20px; text-align: center;
+  border: 1px solid rgba(253,230,138,0.3); cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.proj-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(245,158,11,0.12); }
+.proj-card-icon { font-size: 2.4rem; margin-bottom: 12px; }
+.proj-card h3 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+.proj-card-tags { font-size: 0.8rem; color: #f59e0b; margin-bottom: 8px; }
+.proj-card-desc { font-size: 0.85rem; color: #64748b; line-height: 1.5; }
+
+/* Project Detail */
+.project-detail { padding: 60px 0; }
+.detail-card {
+  background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-radius: 12px; padding: 36px; border: 1px solid rgba(253,230,138,0.3);
+}
+.detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.detail-icon { font-size: 2.2rem; }
+.detail-title { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
+.detail-subtitle { font-size: 0.95rem; color: #64748b; margin-top: 4px; }
+.detail-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.detail-tags span {
+  background: #fef3c7; color: #92400e; padding: 3px 10px; border-radius: 14px;
+  font-size: 0.8rem; font-weight: 500;
+}
+.detail-body { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.detail-highlights h4, .detail-arch h4 {
+  font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;
+  color: #94a3b8; margin-bottom: 10px;
+}
+.detail-highlights ul { list-style: none; }
+.detail-highlights li {
+  font-size: 0.9rem; color: #475569; padding: 6px 0; border-bottom: 1px solid rgba(253,230,138,0.2);
+}
+.detail-highlights li::before { content: "\2713\00A0"; color: #f59e0b; }
+.arch-diagram {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.arch-box {
+  background: #fef3c7; padding: 10px 14px; border-radius: 8px;
+  font-size: 0.8rem; font-weight: 600; color: #92400e; text-align: center;
+}
+.arch-arrow { color: #f59e0b; font-size: 1.2rem; }
+.detail-link {
+  display: inline-block; margin-top: 16px; font-size: 0.9rem; color: #f59e0b;
+  font-weight: 600; transition: color 0.2s; grid-column: 1 / -1;
+}
+.detail-link:hover { color: #ef4444; }
+
+/* About */
+.about { padding: 80px 0; }
+.about-card {
+  background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-radius: 12px; padding: 36px; text-align: center;
+  border: 1px solid rgba(253,230,138,0.3);
+}
+.about-text { font-size: 1rem; color: #475569; max-width: 560px; margin: 0 auto 24px; line-height: 1.7; }
+.skill-cloud { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+.skill-tag {
+  background: rgba(245,158,11,0.1); color: #92400e; padding: 4px 12px;
+  border-radius: 14px; font-size: 0.8rem; border: 1px solid rgba(245,158,11,0.2);
+}
+.about-links { font-size: 0.95rem; color: #64748b; }
+.about-link { color: #f59e0b; font-weight: 600; transition: color 0.2s; }
+.about-link:hover { color: #ef4444; }
+.about-link-sep { margin: 0 8px; color: #d1d5db; }
+
+/* Footer */
+.footer { padding: 32px 0; text-align: center; font-size: 0.8rem; color: #94a3b8; border-top: 1px solid rgba(253,230,138,0.2); }
+.footer-icp { margin-top: 4px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-title { font-size: 2rem; }
+  .hero-subtitle { font-size: 1rem; }
+  .project-cards { grid-template-columns: 1fr; }
+  .detail-body { grid-template-columns: 1fr; }
+  .nav-links { gap: 16px; font-size: 0.8rem; }
+  .arch-diagram { justify-content: center; }
+}
+@media (max-width: 480px) {
+  .hero-title { font-size: 1.6rem; }
+  .container { padding: 0 16px; }
+  .detail-card { padding: 24px; }
+  .hero { min-height: 70vh; padding: 60px 0; }
+}
+</style>
+</head>
+<body>
+
+<a href="#home" class="skip-link">Skip to main content</a>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="#" class="nav-logo">godspeedlucip</a>
+    <div class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#projects">Projects</a>
+      <a href="#about">About</a>
+    </div>
+  </div>
+</nav>
+
+<section id="home" class="hero">
+  <div class="container">
+    <h1 class="hero-title">Hi, I'm <span class="hero-name">godspeedlucip</span></h1>
+    <p class="hero-subtitle">AI Engineer &amp; Full-Stack Developer</p>
+    <div class="hero-tags">
+      <span class="tag">Python</span>
+      <span class="tag">Java</span>
+      <span class="tag">LangGraph</span>
+      <span class="tag">Spring Boot</span>
+      <span class="tag">PyTorch</span>
+      <span class="tag">Docker</span>
+      <span class="tag">Kubernetes</span>
+    </div>
+    <div class="hero-scroll-hint">
+      <span>Explore my work</span>
+      <div class="scroll-arrow" aria-hidden="true">&#8595;</div>
+    </div>
+  </div>
+</section>
+
+<section id="projects" class="projects-overview">
+  <div class="container">
+    <h2 class="section-title">Projects</h2>
+    <div class="project-cards">
+      <div class="proj-card" tabindex="0" role="button" onclick="document.getElementById('detail-finance').scrollIntoView({behavior:'smooth'})" onkeydown="if(event.key==='Enter')this.click()">
+        <div class="proj-card-icon" aria-hidden="true">&#x1F4C8;</div>
+        <h3>Finance AI Agent</h3>
+        <p class="proj-card-tags">LangGraph &middot; MCP &middot; LoRA</p>
+        <p class="proj-card-desc">Multi-agent stock analysis system generating Chinese research reports</p>
+      </div>
+      <div class="proj-card" tabindex="0" role="button" onclick="document.getElementById('detail-research').scrollIntoView({behavior:'smooth'})" onkeydown="if(event.key==='Enter')this.click()">
+        <div class="proj-card-icon" aria-hidden="true">&#x1F52C;</div>
+        <h3>Research Agent</h3>
+        <p class="proj-card-tags">Python &middot; Judge &middot; SSE</p>
+        <p class="proj-card-desc">Multi-service AI research assistant with 6 workflow types</p>
+      </div>
+      <div class="proj-card" tabindex="0" role="button" onclick="document.getElementById('detail-sky').scrollIntoView({behavior:'smooth'})" onkeydown="if(event.key==='Enter')this.click()">
+        <div class="proj-card-icon" aria-hidden="true">&#x1F371;</div>
+        <h3>Sky Take-Out</h3>
+        <p class="proj-card-tags">Spring Boot &middot; MQ &middot; K8s</p>
+        <p class="proj-card-desc">Enterprise food delivery backend with full order pipeline</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="detail-finance" class="project-detail">
+  <div class="container">
+    <div class="detail-card">
+      <div class="detail-header">
+        <span class="detail-icon" aria-hidden="true">&#x1F4C8;</span>
+        <div>
+          <h3 class="detail-title">Finance AI Agent</h3>
+          <p class="detail-subtitle">Multi-agent stock analysis system — from data to research reports</p>
+        </div>
+      </div>
+      <div class="detail-tags">
+        <span>Python</span><span>LangGraph</span><span>FastMCP</span><span>Qwen + LoRA</span><span>PyTorch</span>
+      </div>
+      <div class="detail-body">
+        <div class="detail-highlights">
+          <h4>Key Features</h4>
+          <ul>
+            <li>News deduplication engine using edit distance + MinHash + SimHash</li>
+            <li>Multi-task LoRA fine-tuning for sentiment &amp; risk classification</li>
+            <li>A-share MCP service wrapping Baostock financial data tools</li>
+            <li>5-agent pipeline: fundamentals, technicals, valuation, news, summary</li>
+            <li>Auto-generated Chinese markdown research reports with quality metrics</li>
+          </ul>
+        </div>
+        <div class="detail-arch">
+          <h4>Pipeline</h4>
+          <div class="arch-diagram">
+            <div class="arch-box">Data<br>Prep</div>
+            <div class="arch-arrow">&rarr;</div>
+            <div class="arch-box">LoRA<br>Train</div>
+            <div class="arch-arrow">&rarr;</div>
+            <div class="arch-box">Eval</div>
+            <div class="arch-arrow">&rarr;</div>
+            <div class="arch-box">Multi-Agent<br>Analysis</div>
+            <div class="arch-arrow">&rarr;</div>
+            <div class="arch-box">Report</div>
+          </div>
+        </div>
+        <a href="#" class="detail-link">View on GitHub &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="detail-research" class="project-detail">
+  <div class="container">
+    <div class="detail-card">
+      <div class="detail-header">
+        <span class="detail-icon" aria-hidden="true">&#x1F52C;</span>
+        <div>
+          <h3 class="detail-title">Research Agent</h3>
+          <p class="detail-subtitle">Multi-service AI research assistant platform with 6 workflow types</p>
+        </div>
+      </div>
+      <div class="detail-tags">
+        <span>Python</span><span>LangGraph</span><span>FastAPI</span><span>SSE</span><span>PostgreSQL</span><span>Docker</span>
+      </div>
+      <div class="detail-body">
+        <div class="detail-highlights">
+          <h4>Key Features</h4>
+          <ul>
+            <li>6 AI workflows: QA, Compare, Related Work, Compute, Library, Wiki</li>
+            <li>OAuth2 social login via Google &amp; GitHub with JWT auth</li>
+            <li>Real-time SSE streaming for task status and execution traces</li>
+            <li>LLM-as-Judge quality evaluation with evidence-based scoring</li>
+            <li>Paper library management with PDF parsing, indexing, and search</li>
+          </ul>
+        </div>
+        <div class="detail-arch">
+          <h4>Architecture</h4>
+          <div class="arch-diagram">
+            <div class="arch-box">FastAPI<br>Backend</div>
+            <div class="arch-arrow">&rarr;</div>
+            <div class="arch-box">LangGraph<br>Engine</div>
+            <div class="arch-arrow">&rarr;</div>
+            <div class="arch-box">LLM<br>Judge</div>
+            <div class="arch-arrow">&rarr;</div>
+            <div class="arch-box">SSE<br>Streaming</div>
+          </div>
+        </div>
+        <a href="#" class="detail-link">View on GitHub &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="detail-sky" class="project-detail">
+  <div class="container">
+    <div class="detail-card">
+      <div class="detail-header">
+        <span class="detail-icon" aria-hidden="true">&#x1F371;</span>
+        <div>
+          <h3 class="detail-title">Sky Take-Out</h3>
+          <p class="detail-subtitle">Enterprise food delivery backend system with full order pipeline</p>
+        </div>
+      </div>
+      <div class="detail-tags">
+        <span>Java</span><span>Spring Boot 2.7</span><span>MyBatis</span><span>Redis</span><span>RabbitMQ</span><span>Kubernetes</span>
+      </div>
+      <div class="detail-body">
+        <div class="detail-highlights">
+          <h4>Key Features</h4>
+          <ul>
+            <li>Dual JWT authentication for admin and user roles with interceptors</li>
+            <li>Redis atomic inventory deduction via Lua scripting</li>
+            <li>RabbitMQ async order creation with idempotent submission</li>
+            <li>WebSocket real-time push for new orders and reminders</li>
+            <li>Scheduled tasks for timeout order cancellation and auto-completion</li>
+          </ul>
+        </div>
+        <div class="detail-arch">
+          <h4>Architecture</h4>
+          <div class="arch-diagram">
+            <div class="arch-box">Nginx</div>
+            <div class="arch-arrow">&rarr;</div>
+            <div class="arch-box">Spring<br>Boot</div>
+            <div class="arch-arrow">&rarr;</div>
+            <div class="arch-box">MySQL<br>Redis<br>RabbitMQ</div>
+          </div>
+        </div>
+        <a href="#" class="detail-link">View on GitHub &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="about">
+  <div class="container">
+    <h2 class="section-title">About</h2>
+    <div class="about-card">
+      <p class="about-text">
+        I build AI systems and backend services. Experienced in Python, Java, and full-stack
+        development with a focus on LLM-powered agents, MCP tool chains, and distributed systems.
+      </p>
+      <div class="skill-cloud">
+        <span class="skill-tag">Python</span><span class="skill-tag">Java</span>
+        <span class="skill-tag">LangGraph</span><span class="skill-tag">Spring Boot</span>
+        <span class="skill-tag">PyTorch</span><span class="skill-tag">Docker</span>
+        <span class="skill-tag">Kubernetes</span><span class="skill-tag">Redis</span>
+        <span class="skill-tag">RabbitMQ</span><span class="skill-tag">MySQL</span>
+        <span class="skill-tag">PostgreSQL</span><span class="skill-tag">Git</span>
+      </div>
+      <div class="about-links">
+        <a href="https://github.com/godspeedlucip" class="about-link">&#x1F5A5; GitHub</a>
+        <span class="about-link-sep">&middot;</span>
+        <a href="mailto:contact@example.com" class="about-link">&#x2709; contact@example.com</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2026 godspeedlucip. All rights reserved.</p>
+    <p class="footer-icp">ICP 备案号：粤ICP备XXXXXXXX号</p>
+  </div>
+</footer>
+
+</body>
+</html>

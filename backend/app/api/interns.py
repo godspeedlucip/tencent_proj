@@ -1,0 +1,116 @@
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
+from ..models import SessionLocal
+from ..models.intern import Intern
+from ..models.task import Task
+from ..models.checkin import CheckIn
+from ..services.intern_service import get_intern, submit_checkin, detect_duplicate_checkin
+
+router = APIRouter()
+
+
+@router.get("")
+def list_interns(status: str | None = Query(None), mentor_id: str | None = Query(None)):
+    db = SessionLocal()
+    try:
+        q = db.query(Intern)
+        if status:
+            q = q.filter(Intern.status == status)
+        if mentor_id:
+            q = q.filter(Intern.mentor_id == mentor_id)
+        interns = q.all()
+        result = []
+        for intern in interns:
+            result.append({
+                "id": intern.id, "name": intern.name, "role": intern.role,
+                "department": intern.department, "mentor_name": intern.mentor.name if intern.mentor else "",
+                "onboard_week": intern.onboard_week, "status": intern.status.value,
+                "task_completion_rate": 0.8, "last_emotion": None,
+            })
+        dist = {}
+        for s in ["normal", "potential", "watch", "risk"]:
+            dist[s] = sum(1 for i in interns if i.status.value == s)
+        return {"interns": result, "total": len(result), "status_distribution": dist}
+    finally:
+        db.close()
+
+
+@router.get("/{intern_id}")
+def get_intern_detail(intern_id: str):
+    data = get_intern(intern_id)
+    if not data:
+        raise HTTPException(404, "Intern not found")
+    return data
+
+
+@router.get("/{intern_id}/tasks")
+def get_intern_tasks(intern_id: str):
+    db = SessionLocal()
+    try:
+        tasks = db.query(Task).filter(Task.intern_id == intern_id).all()
+        return {"tasks": [
+            {"id": t.id, "title": t.title, "type": t.type.value, "priority": t.priority.value,
+             "status": t.status.value, "due_date": t.due_date.isoformat() if t.due_date else None}
+            for t in tasks
+        ]}
+    finally:
+        db.close()
+
+
+@router.get("/{intern_id}/checkins")
+def get_intern_checkins(intern_id: str, week: int | None = Query(None)):
+    db = SessionLocal()
+    try:
+        q = db.query(CheckIn).filter(CheckIn.intern_id == intern_id)
+        if week:
+            q = q.filter(CheckIn.week == week)
+        checkins = q.order_by(CheckIn.submitted_at.desc()).all()
+        return {"checkins": [
+            {"id": c.id, "week": c.week, "progress": c.progress, "blockers": c.blockers,
+             "emotion_capsule": c.emotion_capsule.value, "next_plan": c.next_plan,
+             "submitted_at": c.submitted_at.isoformat(), "has_feedback": False}
+            for c in checkins
+        ]}
+    finally:
+        db.close()
+
+
+class CheckInRequest(BaseModel):
+    week: int
+    progress: str
+    blockers: str | None = None
+    emotion_capsule: str
+    next_plan: str | None = None
+
+
+@router.post("/{intern_id}/checkins")
+def create_checkin(intern_id: str, req: CheckInRequest):
+    db = SessionLocal()
+    try:
+        intern = db.query(Intern).filter(Intern.id == intern_id).first()
+        if not intern:
+            raise HTTPException(404, "Intern not found")
+    finally:
+        db.close()
+    if detect_duplicate_checkin(intern_id, req.progress):
+        return {"id": "", "warning": "内容与上周高度相似，请确认并非敷衍填写。"}
+    return submit_checkin(intern_id, req.model_dump())
+
+
+class BaselineRequest(BaseModel):
+    scores: dict[str, int]
+
+
+@router.post("/{intern_id}/baseline")
+def submit_baseline(intern_id: str, req: BaselineRequest):
+    db = SessionLocal()
+    try:
+        intern = db.query(Intern).filter(Intern.id == intern_id).first()
+        if not intern:
+            raise HTTPException(404, "Intern not found")
+        intern.baseline_scores = req.scores
+        intern.current_scores = dict(req.scores)
+        db.commit()
+        return {"id": intern.id, "status": "pending_mentor_review"}
+    finally:
+        db.close()

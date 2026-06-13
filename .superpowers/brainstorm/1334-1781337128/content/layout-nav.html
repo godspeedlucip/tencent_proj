@@ -1,0 +1,118 @@
+<h2>布局与导航 — 页面外壳重塑</h2>
+<p class="subtitle">参考 index.html 的 sticky nav + 全宽内容区，替换 Ant Design Layout 默认样式</p>
+
+<div class="section">
+  <h3>1. 顶部导航栏 — Before vs After</h3>
+
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">当前：Ant Design Header</div>
+      <div class="mockup-body">
+        <div style="background:#fff;border-bottom:1px solid #f0f0f0;padding:12px 24px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:18px;font-weight:700;color:#000">实习能量站</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="background:#e6f7ff;color:#1890ff;padding:4px 12px;border-radius:4px;font-size:14px">👤 实习生视角</span>
+            <select style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:6px;width:100px"></select>
+          </div>
+        </div>
+        <p style="font-size:0.75rem;color:#94a3b8;margin-top:8px;text-align:center">
+          纯白背景 · 默认分割线 · 标准黑字 —— 功能正确但无品牌感
+        </p>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">优化后：Glass Nav</div>
+      <div class="mockup-body">
+        <div style="background:rgba(255,255,255,0.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(253,230,138,0.3);padding:12px 24px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">实习能量站</span>
+          <div style="display:flex;gap:12px;align-items:center">
+            <span style="background:rgba(245,158,11,0.1);color:#92400e;padding:4px 14px;border-radius:20px;font-size:0.85rem;font-weight:500;border:1px solid rgba(245,158,11,0.2)">👤 实习生视角</span>
+            <select style="padding:5px 12px;border:1px solid rgba(253,230,138,0.4);border-radius:8px;background:rgba(255,255,255,0.5);font-size:0.85rem;color:#475569"></select>
+          </div>
+        </div>
+        <p style="font-size:0.75rem;color:#94a3b8;margin-top:8px;text-align:center">
+          玻璃态背景 · amber 分割线 · 渐变 Logo · 胶囊 Tag —— 品牌感立现
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. 页面整体布局结构</h3>
+
+  <div class="mockup">
+    <div class="mockup-header">新页面外壳</div>
+    <div class="mockup-body">
+      <!-- Simulated page -->
+      <div style="border:1px solid rgba(253,230,138,0.2);border-radius:8px;overflow:hidden">
+        <!-- Nav -->
+        <div style="background:rgba(255,255,255,0.7);backdrop-filter:blur(12px);border-bottom:1px solid rgba(253,230,138,0.3);padding:12px 24px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:800;background:linear-gradient(135deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent">实习能量站</span>
+          <span style="font-size:0.8rem;color:#94a3b8">角色切换 →</span>
+        </div>
+        <!-- Content area -->
+        <div style="background:linear-gradient(135deg,#fffbeb 0%,#f0f9ff 100%);padding:24px;min-height:200px">
+          <div style="max-width:1200px;margin:0 auto">
+            <!-- Page title -->
+            <h2 style="font-size:1.5rem;font-weight:700;color:#1e293b;margin:0 0 20px">欢迎回来，张三</h2>
+            <!-- Card grid -->
+            <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+              <div style="background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3)">
+                <span style="font-weight:600;color:#1e293b">主卡片区域</span>
+                <div style="display:flex;gap:12px;margin-top:12px">
+                  <div class="placeholder" style="flex:1">统计</div>
+                  <div class="placeholder" style="flex:1">统计</div>
+                  <div class="placeholder" style="flex:1">统计</div>
+                </div>
+              </div>
+              <div style="background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3)">
+                <span style="font-weight:600;color:#1e293b">侧边卡片</span>
+                <div class="placeholder" style="margin-top:12px">AI 建议</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:0.85rem;color:#475569">
+    <div>
+      <strong style="color:#1e293b">关键改动：</strong>
+      <ul style="padding-left:18px;margin:8px 0 0">
+        <li>移除 Ant Design Layout 组件，改用原生 div + Tailwind</li>
+        <li>Content 区从纯色 <code>#f5f5f5</code> 改为渐变背景</li>
+        <li>页面内容用 <code>max-width: 1200px</code> 居中，两侧留白</li>
+        <li>卡片间距统一为 <code>gap: 16px</code></li>
+      </ul>
+    </div>
+    <div>
+      <strong style="color:#1e293b">保留不变：</strong>
+      <ul style="padding-left:18px;margin:8px 0 0">
+        <li>角色切换交互逻辑（Select + Tag）</li>
+        <li>页面路由结构（不引入 React Router）</li>
+        <li>数据加载与错误处理流程</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. RoleSwitcher 组件改进</h3>
+  <p style="color:#64748b;margin-bottom:12px">当前功能正常，仅做视觉微调——胶囊化 Tag + 圆角 Select</p>
+
+  <div style="background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3);display:flex;align-items:center;gap:16px;justify-content:center">
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(245,158,11,0.08);padding:6px 16px;border-radius:24px;border:1px solid rgba(245,158,11,0.15)">
+      <span style="font-size:0.85rem">👤</span>
+      <span style="font-size:0.85rem;font-weight:600;color:#92400e">实习生视角</span>
+    </div>
+    <span style="color:#94a3b8;font-size:0.8rem">切换至</span>
+    <select style="padding:6px 16px;border:1px solid rgba(253,230,138,0.4);border-radius:8px;background:rgba(255,255,255,0.6);font-size:0.85rem;color:#475569;cursor:pointer">
+      <option>实习生</option>
+      <option>导师</option>
+      <option>HR</option>
+      <option>招聘</option>
+    </select>
+  </div>
+</div>

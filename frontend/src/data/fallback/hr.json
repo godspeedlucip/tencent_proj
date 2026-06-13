@@ -1,0 +1,21 @@
+{
+  "weekly_report": {
+    "summary_stats": {
+      "checkin_rate": 0.95,
+      "avg_task_completion": 0.78,
+      "risk_count": 1,
+      "new_risks_this_week": 1,
+      "resolved_risks_this_week": 0
+    },
+    "recommended_actions": [
+      "重点关注实习生[小胡]：连续情绪低落后首次出现周报逾期，建议HR主动介入沟通",
+      "建议与导师[张哥]沟通，了解小林Figma培训资源是否到位",
+      "本周整体表现稳定，14名实习生任务完成率超过80%"
+    ]
+  },
+  "risk_descriptions": {
+    "连续两周未提交周报": "连续两周未按时提交Check-in，可能存在脱离培养体系的风险",
+    "情绪胶囊连续三周为blocked": "连续三周情绪信号为'遇到瓶颈'，可能面临较大的工作压力或方向迷茫",
+    "任务完成率持续低于40%": "多周任务完成率低于40%，可能存在能力不匹配或任务分配不合理的问题"
+  }
+}

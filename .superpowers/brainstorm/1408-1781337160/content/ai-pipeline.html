@@ -1,0 +1,132 @@
+<h2>Section 1: AI Pipeline Architecture</h2>
+<p class="subtitle">Current → Proposed: From fake AI to real, context-aware, async AI</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Current: Synchronous with no context</div>
+    <div class="mockup-body">
+      <p style="color:#cf1322;margin-bottom:8px"><strong>Problems:</strong></p>
+      <ul style="font-size:13px;line-height:2;padding-left:16px">
+        <li>No API key → always falls back</li>
+        <li>Only passes intern <em>name</em>, no real data</li>
+        <li>Blocks request (sync call)</li>
+        <li>No post-Check-in analysis</li>
+        <li>No confidence scores</li>
+        <li>Risk detection never called</li>
+      </ul>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">Proposed: Async + Context-Rich + Multi-Provider</div>
+    <div class="mockup-body">
+      <p style="color:#3f8600;margin-bottom:8px"><strong>Changes:</strong></p>
+      <ul style="font-size:13px;line-height:2;padding-left:16px">
+        <li>OpenAI-compatible providers (DeepSeek/GPT)</li>
+        <li>Rich context: tasks + checkins + feedback history</li>
+        <li>FastAPI BackgroundTasks for analysis</li>
+        <li>Auto-triggered after Check-in submit</li>
+        <li>Confidence + evidence on every output</li>
+        <li>Risk detection integrated into flow</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top:28px">Post-Check-in AI Flow</h3>
+
+<div class="mockup">
+  <div class="mockup-header">Async Pipeline: Check-in → Analysis → Multi-Output</div>
+  <div class="mockup-body">
+    <div style="display:flex;gap:12px;font-size:13px;line-height:1.8">
+      <div style="flex:1;background:#e6f7ff;border-radius:8px;padding:12px">
+        <strong>1. Submit</strong><br>
+        Intern submits Check-in<br>
+        → Returns 202 Accepted<br>
+        → "分析中，稍后刷新"
+      </div>
+      <div style="flex:1;background:#fff7e6;border-radius:8px;padding:12px">
+        <strong>2. Analyze</strong><br>
+        BackgroundTask runs:<br>
+        Text → growth keywords<br>
+        Sentiment → risk signals<br>
+        Compare → trend detection
+      </div>
+      <div style="flex:1;background:#f6ffed;border-radius:8px;padding:12px">
+        <strong>3. Generate</strong><br>
+        Save risk_signal records<br>
+        Update intern growth summary<br>
+        Generate mentor talking points<br>
+        Refresh daily tip context
+      </div>
+      <div style="flex:1;background:#f9f0ff;border-radius:8px;padding:12px">
+        <strong>4. Consume</strong><br>
+        HR sees new risk alerts<br>
+        Mentor gets updated outline<br>
+        Intern sees growth keywords<br>
+        All with confidence scores
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top:28px">LLM Provider Strategy</h3>
+
+<table style="width:100%;font-size:13px">
+  <tr style="background:#fafafa">
+    <th style="padding:8px;text-align:left">Task</th>
+    <th style="padding:8px;text-align:left">Model</th>
+    <th style="padding:8px;text-align:left">Timeout</th>
+    <th style="padding:8px;text-align:left">Fallback</th>
+  </tr>
+  <tr>
+    <td style="padding:8px">Daily Tip</td>
+    <td style="padding:8px">Cheap (DeepSeek-V3 / GPT-4o-mini)</td>
+    <td style="padding:8px">3s</td>
+    <td style="padding:8px">Role-aware pre-baked tips</td>
+  </tr>
+  <tr style="background:#fafafa">
+    <td style="padding:8px">Talking Points (1:1 outline)</td>
+    <td style="padding:8px">Balanced (DeepSeek-R1 / GPT-4o)</td>
+    <td style="padding:8px">5s</td>
+    <td style="padding:8px">Template outlines by intern status</td>
+  </tr>
+  <tr>
+    <td style="padding:8px">Check-in Analysis (keywords + risk)</td>
+    <td style="padding:8px">Cheap (batch mode)</td>
+    <td style="padding:8px">8s</td>
+    <td style="padding:8px">Keyword extraction rules</td>
+  </tr>
+  <tr style="background:#fafafa">
+    <td style="padding:8px">HR Weekly Report</td>
+    <td style="padding:8px">Best (DeepSeek-R1 / GPT-4o)</td>
+    <td style="padding:8px">10s</td>
+    <td style="padding:8px">Statistical summary + rule-based actions</td>
+  </tr>
+  <tr>
+    <td style="padding:8px">Fit Report</td>
+    <td style="padding:8px">Balanced</td>
+    <td style="padding:8px">8s</td>
+    <td style="padding:8px">Score-based tier assignment</td>
+  </tr>
+</table>
+
+<h3 style="margin-top:28px">Key Design Decisions</h3>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Provider: DeepSeek (via OpenAI-compatible API)</h3>
+      <p>Cheaper than GPT-4o, good Chinese NLP for the 中文 Check-in content. Same API shape as OpenAI = zero code change.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Provider: OpenAI GPT-4o-mini + GPT-4o</h3>
+      <p>Better JSON structured output reliability. Higher cost but more consistent formatting for reports.</p>
+    </div>
+  </div>
+</div>
+
+<p style="margin-top:16px;color:#888">Does this AI pipeline design look right? Any preference on LLM provider (A vs B)? Or do you want to use both — DeepSeek for Chinese content, GPT for structured JSON?</p>
