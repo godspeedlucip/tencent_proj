@@ -73,11 +73,16 @@ def get_intern_tasks(intern_id: str):
 def get_intern_checkins(intern_id: str, week: int | None = Query(None)):
     db = SessionLocal()
     try:
+        intern = db.query(Intern).filter(Intern.id == intern_id).first()
+        if not intern:
+            raise HTTPException(404, "Intern not found")
         q = db.query(CheckIn).filter(CheckIn.intern_id == intern_id)
         if week:
             q = q.filter(CheckIn.week == week)
         checkins = q.order_by(CheckIn.submitted_at.desc()).all()
         from ..models.mentor_feedback import MentorFeedback
+        from ..services.mentor_service import compute_is_late
+        mentor_id = intern.mentor_id
         return {"checkins": [
             {
                 "id": c.id, "week": c.week, "progress": c.progress, "blockers": c.blockers,
@@ -87,6 +92,8 @@ def get_intern_checkins(intern_id: str, week: int | None = Query(None)):
                     MentorFeedback.intern_id == intern_id,
                     MentorFeedback.checkin_id == c.id,
                 ).count() > 0,
+                "weekly_report_md": c.weekly_report_md,
+                "is_late": compute_is_late(c.submitted_at, mentor_id),
             }
             for c in checkins
         ]}
