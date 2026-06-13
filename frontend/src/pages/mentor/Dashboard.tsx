@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Table, Spin, Alert } from 'antd'
+import { Table, Spin, Alert, Skeleton } from 'antd'
 import { MessageOutlined, EyeOutlined } from '@ant-design/icons'
 import { mentors } from '../../services/api'
 import type { Intern } from '../../types'
@@ -31,7 +31,7 @@ export default function MentorDashboard({ user }: Props) {
     finally { setLoading(false) }
   }
 
-  if (loading) return <Spin size="large" style={{ display: 'block', margin: '200px auto' }} />
+  if (loading) return <Skeleton active paragraph={{ rows: 6 }} />
   if (interns.length === 0) return <Alert message="暂无带教实习生数据" type="info" />
 
   const cols = [
