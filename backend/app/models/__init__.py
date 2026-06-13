@@ -19,3 +19,4 @@ from .mentor_feedback import MentorFeedback
 from .risk_signal import RiskSignal
 from .fit_report import FitReport
 from .notification import Notification
+from .weekly_report_deadline import WeeklyReportDeadline

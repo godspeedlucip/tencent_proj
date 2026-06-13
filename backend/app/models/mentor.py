@@ -15,3 +15,4 @@ class Mentor(Base):
     user: Mapped["User"] = relationship()
     interns: Mapped[list["Intern"]] = relationship(back_populates="mentor")
     feedbacks: Mapped[list["MentorFeedback"]] = relationship(back_populates="mentor")
+    deadline: Mapped["WeeklyReportDeadline | None"] = relationship(back_populates="mentor", uselist=False, cascade="all, delete-orphan")
