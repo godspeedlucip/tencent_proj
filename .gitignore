@@ -29,6 +29,9 @@ Desktop.ini
 *.swo
 *~
 
+# === Superpowers ===
+.superpowers/
+
 # === Misc ===
 *.log
 *.tmp
