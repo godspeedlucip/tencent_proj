@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Table, Spin, Alert, Skeleton } from 'antd'
-import { MessageOutlined, EyeOutlined } from '@ant-design/icons'
+import { MessageOutlined, EyeOutlined, EditOutlined, FileTextOutlined, StarOutlined, FormOutlined } from '@ant-design/icons'
 import { mentors } from '../../services/api'
 import type { Intern } from '../../types'
 import Feedback from './Feedback'
 import TalkingPointsView from './TalkingPoints'
+import BaselineModal from './BaselineModal'
+import TaskListModal from './TaskListModal'
+import WeeklyReportModal from './WeeklyReportModal'
 
 interface Props { user: { id: string; name: string; department: string } }
 
@@ -20,6 +23,9 @@ export default function MentorDashboard({ user }: Props) {
   const [loading, setLoading] = useState(true)
   const [feedbackIntern, setFeedbackIntern] = useState<Intern | null>(null)
   const [talkingPointsIntern, setTalkingPointsIntern] = useState<Intern | null>(null)
+  const [baselineIntern, setBaselineIntern] = useState<Intern | null>(null)
+  const [taskListIntern, setTaskListIntern] = useState<Intern | null>(null)
+  const [weeklyReportIntern, setWeeklyReportIntern] = useState<Intern | null>(null)
 
   useEffect(() => { loadInterns() }, [user.id])
 
@@ -55,9 +61,25 @@ export default function MentorDashboard({ user }: Props) {
     {
       title: '操作', key: 'actions',
       render: (_: any, record: Intern) => (
-        <span style={{ display: 'flex', gap: 8 }}>
+        <span style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {(record as any).baseline_scores === null && (
+            <button className="btn-link" onClick={() => setBaselineIntern(record)} title="基线评估">
+              <FormOutlined /> 基线
+            </button>
+          )}
+          <button className="btn-link" onClick={() => {
+            window.location.href = `/mentor/assign?intern_id=${record.id}&intern_name=${encodeURIComponent(record.name)}`
+          }} title="布置任务">
+            <EditOutlined /> 布置
+          </button>
+          <button className="btn-link" onClick={() => setTaskListIntern(record)} title="查看任务">
+            <FileTextOutlined /> 任务
+          </button>
+          <button className="btn-link" onClick={() => setWeeklyReportIntern(record)} title="查看周报">
+            <EyeOutlined /> 周报
+          </button>
           <button className="btn-link" onClick={() => setTalkingPointsIntern(record)}>
-            <EyeOutlined /> 沟通提纲
+            <StarOutlined /> 提纲
           </button>
           <button className="btn-link" onClick={() => setFeedbackIntern(record)}>
             <MessageOutlined /> 反馈
@@ -89,6 +111,32 @@ export default function MentorDashboard({ user }: Props) {
           internId={talkingPointsIntern.id}
           internName={talkingPointsIntern.name}
           onClose={() => setTalkingPointsIntern(null)}
+        />
+      )}
+
+      {baselineIntern && (
+        <BaselineModal
+          internId={baselineIntern.id}
+          internName={baselineIntern.name}
+          onClose={() => { setBaselineIntern(null); loadInterns() }}
+        />
+      )}
+
+      {taskListIntern && (
+        <TaskListModal
+          mentorId={user.id}
+          internId={taskListIntern.id}
+          internName={taskListIntern.name}
+          onClose={() => setTaskListIntern(null)}
+        />
+      )}
+
+      {weeklyReportIntern && (
+        <WeeklyReportModal
+          mentorId={user.id}
+          internId={weeklyReportIntern.id}
+          internName={weeklyReportIntern.name}
+          onClose={() => { setWeeklyReportIntern(null); loadInterns() }}
         />
       )}
     </>
