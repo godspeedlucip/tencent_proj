@@ -12,6 +12,9 @@ import TaskReport from './pages/intern/TaskReport'
 import TaskReview from './pages/mentor/TaskReview'
 import AssignTask from './pages/mentor/AssignTask'
 import TaskTemplates from './pages/mentor/TaskTemplates'
+import HRLayout from './pages/hr/HRLayout'
+import InternManage from './pages/hr/InternManage'
+import MentorManage from './pages/hr/MentorManage'
 
 const antTheme = {
   token: {
@@ -48,8 +51,13 @@ function AppShell() {
               <Route path="/mentor/review/:taskId" element={<TaskReview />} />
               <Route path="/mentor/assign" element={<AssignTask />} />
               <Route path="/mentor/templates" element={<TaskTemplates />} />
-              <Route path="/hr" element={<HRRiskBoard />} />
-              <Route path="/hr/analytics" element={<HRAnalytics />} />
+              <Route path="/hr" element={<HRLayout />}>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<HRRiskBoard />} />
+                <Route path="analytics" element={<HRAnalytics />} />
+                <Route path="interns" element={<InternManage />} />
+                <Route path="mentors" element={<MentorManage />} />
+              </Route>
               <Route path="/recruiter" element={<RecruiterFitReportList />} />
             </Routes>
           </div>

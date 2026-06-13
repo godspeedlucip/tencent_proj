@@ -69,8 +69,6 @@ export default function HRDashboard() {
 
   return (
     <>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e293b', margin: '0 0 20px' }}>HR 全局看板</h2>
-
       {/* Stats Row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 16 }}>
         {statCards.map(s => (
