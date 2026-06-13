@@ -7,6 +7,7 @@ import CheckIn from './CheckIn'
 import Tasks from './Tasks'
 import Baseline from './Baseline'
 import AIDailyTip from '../../components/AIDailyTip'
+import CelebrationCard from '../../components/CelebrationCard'
 
 interface Props { user: { id: string; name: string; department: string } }
 
@@ -18,10 +19,17 @@ export default function InternDashboard({ user }: Props) {
   const [tipError, setTipError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [showCheckin, setShowCheckin] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
 
   useEffect(() => {
     loadData()
   }, [user.id])
+
+  useEffect(() => {
+    if (intern && (intern.task_completion_rate ?? 0) >= 0.9 && intern.status === 'potential') {
+      setShowCelebration(true)
+    }
+  }, [intern])
 
   async function loadData() {
     try {
@@ -166,6 +174,14 @@ export default function InternDashboard({ user }: Props) {
         <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 12px' }}>本周任务</h3>
         <Tasks tasks={tasks} />
       </div>
+
+      {showCelebration && (
+        <CelebrationCard
+          internName={intern.name}
+          reason="你连续保持高任务完成率，展现出优秀的成长潜力！"
+          onDismiss={() => setShowCelebration(false)}
+        />
+      )}
     </div>
   )
 }
