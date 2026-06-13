@@ -6,6 +6,7 @@ import type { Intern, Task, AIDailyTip } from '../../types'
 import CheckIn from './CheckIn'
 import Tasks from './Tasks'
 import Baseline from './Baseline'
+import AIDailyTip from '../../components/AIDailyTip'
 
 interface Props { user: { id: string; name: string; department: string } }
 
@@ -13,6 +14,8 @@ export default function InternDashboard({ user }: Props) {
   const [intern, setIntern] = useState<(Intern & { recent_checkins?: any[] }) | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [dailyTip, setDailyTip] = useState<AIDailyTip | null>(null)
+  const [tipLoading, setTipLoading] = useState(false)
+  const [tipError, setTipError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [showCheckin, setShowCheckin] = useState(false)
 
@@ -22,18 +25,27 @@ export default function InternDashboard({ user }: Props) {
 
   async function loadData() {
     try {
-      const [i, t, tip] = await Promise.all([
+      const [i, t] = await Promise.all([
         interns.get(user.id),
         interns.getTasks(user.id).then(r => r.tasks),
-        ai.getDailyTip(user.id).catch(() => ({ tip: '加载AI建议...', source: 'fallback', generated_at: '' })),
       ])
       setIntern(i)
       setTasks(t)
-      setDailyTip(tip)
     } catch {
       setIntern(null)
     } finally {
       setLoading(false)
+    }
+
+    setTipLoading(true)
+    setTipError(null)
+    try {
+      const tip = await ai.getDailyTip(user.id)
+      setDailyTip(tip)
+    } catch {
+      setTipError('无法连接 AI 服务，请稍后刷新')
+    } finally {
+      setTipLoading(false)
     }
   }
 
@@ -146,23 +158,7 @@ export default function InternDashboard({ user }: Props) {
         </div>
 
         {/* AI Daily Tip */}
-        <div className="glass-card" style={{ padding: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <BulbOutlined style={{ color: '#f59e0b', fontSize: 20 }} />
-            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: 0 }}>今日AI成长建议</h3>
-          </div>
-          <span className="capsule-tag" style={{
-            background: dailyTip?.source === 'ai' ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
-            borderColor: dailyTip?.source === 'ai' ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)',
-            color: dailyTip?.source === 'ai' ? '#065f46' : '#92400e',
-            marginBottom: 12,
-          }}>
-            {dailyTip?.source === 'ai' ? 'AI' : '本地'}
-          </span>
-          <p style={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.6 }}>
-            {dailyTip?.tip || '加载中...'}
-          </p>
-        </div>
+        <AIDailyTip tip={dailyTip} loading={tipLoading} error={tipError} />
       </div>
 
       {/* Tasks Card */}
