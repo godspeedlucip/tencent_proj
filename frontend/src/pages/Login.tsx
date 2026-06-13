@@ -57,7 +57,7 @@ export default function LoginPage() {
         border: '1px solid rgba(255,255,255,0.3)',
         borderRadius: 12,
         padding: '36px 32px',
-        boxShadow: '0 0 24px rgba(255,255,255,0.15), 0 0 48px rgba(147,112,219,0.25), 0 8px 32px rgba(0,0,0,0.2)',
+        boxShadow: '0 0 24px rgba(255,255,255,0.15), 0 0 48px rgba(245,158,11,0.25), 0 8px 32px rgba(0,0,0,0.2)',
       }}>
         <h2 style={{
           textAlign: 'center',
