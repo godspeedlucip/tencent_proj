@@ -1,3 +1,5 @@
+import random
+import string
 from collections import Counter
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
@@ -8,11 +10,23 @@ from ..models.task import Task, TaskStatus
 from ..models.checkin import CheckIn
 from ..models.risk_signal import RiskSignal, ReviewStatus
 from ..models.mentor import Mentor
-from ..models.user import User
+from ..models.user import User, RoleType
 from ..models.mentor_feedback import MentorFeedback, VoteType
 from ..services.hr_service import get_dashboard, get_weekly_report, set_proxy_mentor
+from .auth import hash_password
 
 router = APIRouter()
+
+
+def _generate_username(name: str) -> str:
+    base = name.lower().replace(" ", "")
+    suffix = str(random.randint(1000, 9999))
+    return f"{base}{suffix}"
+
+
+def _generate_password() -> str:
+    chars = string.ascii_letters + string.digits
+    return "".join(random.choices(chars, k=8))
 
 
 @router.get("/dashboard")
