@@ -4,6 +4,7 @@ import type { Role } from './types'
 import { auth, setRole as setApiRole } from './services/api'
 import RoleSwitcher from './components/RoleSwitcher'
 import PrivacyModal from './components/PrivacyModal'
+import NotificationBell from './components/NotificationBell'
 import InternDashboard from './pages/intern/Dashboard'
 import MentorDashboard from './pages/mentor/Dashboard'
 import HRDashboard from './pages/hr/RiskBoard'
@@ -60,7 +61,10 @@ export default function App() {
         <nav className="glass-nav" style={{ padding: '12px 24px' }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span className="gradient-text" style={{ fontSize: '1.1rem', fontWeight: 800 }}>实习能量站</span>
-            <RoleSwitcher currentRole={role} onSwitch={handleRoleSwitch} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <NotificationBell role={role} userId={user?.id ?? ''} />
+              <RoleSwitcher currentRole={role} onSwitch={handleRoleSwitch} />
+            </div>
           </div>
         </nav>
         <main style={{ flex: 1, padding: 24 }}>

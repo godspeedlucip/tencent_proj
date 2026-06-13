@@ -1,4 +1,4 @@
-import type { Intern, CheckIn, Task, MentorFeedback, TalkingPoints, AIDailyTip, HRDashboard, WeeklyReport, RiskSignal, FitReport } from '../types'
+import type { Intern, CheckIn, Task, MentorFeedback, TalkingPoints, AIDailyTip, HRDashboard, WeeklyReport, RiskSignal, FitReport, Notification, AnalyticsData, MentorPerformance } from '../types'
 
 const BASE = '/api/v1'
 
@@ -62,18 +62,36 @@ export const mentors = {
   getFeedbackDraft: (internId: string) => request<{ intern_id: string; ai_draft: string; generated_at: string; source: string }>(`/mentor/feedback-draft/${internId}`),
 }
 
-// HR
-export const hr = {
-  getDashboard: () => request<HRDashboard>('/hr/dashboard'),
-  getWeeklyReport: () => request<WeeklyReport>('/hr/weekly-report'),
-  setProxyMentor: (internId: string, proxyMentorId: string, reason: string) =>
-    request<{ status: string }>(`/hr/interns/${internId}/proxy-mentor`, { method: 'POST', body: JSON.stringify({ proxy_mentor_id: proxyMentorId, reason }) }),
-}
-
 // Recruiters
 export const recruiters = {
   getFitReports: () => request<{ reports: FitReport[] }>('/recruiter/fit-reports'),
   getFitReport: (id: string) => request<FitReport>(`/recruiter/fit-reports/${id}`),
+}
+
+// HR (extended)
+export const hr = {
+  getDashboard: () => request<HRDashboard>('/hr/dashboard'),
+  getWeeklyReport: () => request<WeeklyReport>('/hr/weekly-report'),
+  getAnalytics: () => request<AnalyticsData>('/hr/analytics'),
+  setProxyMentor: (internId: string, proxyMentorId: string, reason: string) =>
+    request<{ status: string }>(`/hr/interns/${internId}/proxy-mentor`, { method: 'POST', body: JSON.stringify({ proxy_mentor_id: proxyMentorId, reason }) }),
+  reviewRisk: (riskId: string, reviewStatus: string, reviewNote: string) =>
+    request<{ status: string }>(`/hr/risks/${riskId}/review`, { method: 'POST', body: JSON.stringify({ review_status: reviewStatus, review_note: reviewNote }) }),
+  getMentorPerformance: () => request<MentorPerformance[]>('/hr/mentor-performance'),
+  exportData: (format: string) => request<Blob>(`/hr/export?format=${format}`),
+}
+
+// Notifications
+export const notifications = {
+  list: (role: string, userId: string, unreadOnly = false) => {
+    const params = new URLSearchParams({ role, user_id: userId, unread_only: String(unreadOnly) })
+    return request<{ notifications: Notification[]; unread_count: number }>(`/notifications?${params}`)
+  },
+  markRead: (id: string) => request<{ status: string }>(`/notifications/${id}/read`, { method: 'POST' }),
+  markAllRead: (role: string, userId: string) => {
+    const params = new URLSearchParams({ role, user_id: userId })
+    return request<{ status: string }>(`/notifications/read-all?${params}`, { method: 'POST' })
+  },
 }
 
 // AI

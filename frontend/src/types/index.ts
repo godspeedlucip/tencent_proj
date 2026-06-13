@@ -122,6 +122,35 @@ export interface AIDailyTip {
   source: string
 }
 
+export interface Notification {
+  id: string
+  type: 'deadline_reminder' | 'mentor_nudge' | 'risk_alert' | 'positive_milestone' | 'system'
+  title: string
+  body: string
+  priority: 'high' | 'medium' | 'low'
+  read: boolean
+  action_link: string | null
+  created_at: string
+}
+
+export interface AnalyticsData {
+  growth_trend: { week: number; avg_business_understanding: number; avg_requirement_analysis: number; avg_collaboration: number; avg_delivery: number }[]
+  emotion_distribution: { emotion: string; count: number }[]
+  task_completion_trend: { week: number; completed: number; in_progress: number; blocked: number }[]
+  risk_timeline: { intern_name: string; week: number; level: string }[]
+  mentor_feedback_coverage: { mentor_name: string; coverage_pct: number }[]
+}
+
+export interface MentorPerformance {
+  mentor_name: string
+  intern_count: number
+  avg_feedback_hours: number
+  feedback_coverage_pct: number
+  avg_mentee_growth: number
+  ai_override_rate: number
+  at_risk_count: number
+}
+
 export interface ApiError {
   error: { code: string; message: string }
 }
