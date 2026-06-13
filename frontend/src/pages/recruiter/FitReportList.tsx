@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Card, Table, Tag, Button, Modal, Spin, Alert } from 'antd'
+import { Table, Spin, Alert } from 'antd'
 import { EyeOutlined } from '@ant-design/icons'
 import { recruiters } from '../../services/api'
 import type { FitReport } from '../../types'
 import FitReportDetail from './FitReportDetail'
-import RadarChart from '../../components/RadarChart'
 
-const recTag: Record<string, { color: string; label: string }> = {
-  high_potential: { color: 'green', label: '高潜' },
-  observe: { color: 'orange', label: '观察' },
-  not_suitable: { color: 'red', label: '暂不适配' },
+const recStyle: Record<string, { bg: string; border: string; color: string; label: string }> = {
+  high_potential: { bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)', color: '#065f46', label: '高潜' },
+  observe: { bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.2)', color: '#92400e', label: '观察' },
+  not_suitable: { bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.2)', color: '#991b1b', label: '暂不适配' },
 }
 
 export default function FitReportList() {
@@ -29,17 +28,39 @@ export default function FitReportList() {
 
   const cols = [
     { title: '实习生', dataIndex: 'intern_name', key: 'name' },
-    { title: 'AI建议', dataIndex: 'ai_recommendation', key: 'rec', render: (v: string) => <Tag color={recTag[v]?.color}>{recTag[v]?.label}</Tag> },
-    { title: '人工复核', dataIndex: 'has_human_review', key: 'reviewed', render: (v: boolean) => v ? <Tag color="green">已复核</Tag> : <Tag color="red">未复核</Tag> },
-    { title: '生成时间', dataIndex: 'generated_at', key: 'time', render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
-    { title: '操作', key: 'action', render: (_: any, r: FitReport) => <Button type="link" icon={<EyeOutlined />} onClick={() => setSelected(r)}>查看详情</Button> },
+    {
+      title: 'AI建议', dataIndex: 'ai_recommendation', key: 'rec',
+      render: (v: string) => {
+        const rs = recStyle[v] ?? recStyle.observe
+        return <span className="capsule-tag" style={{ background: rs.bg, borderColor: rs.border, color: rs.color }}>{rs.label}</span>
+      },
+    },
+    {
+      title: '人工复核', dataIndex: 'has_human_review', key: 'reviewed',
+      render: (v: boolean) => v
+        ? <span className="capsule-tag" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'rgba(16,185,129,0.2)', color: '#065f46' }}>已复核</span>
+        : <span className="capsule-tag" style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'rgba(239,68,68,0.2)', color: '#991b1b' }}>未复核</span>,
+    },
+    {
+      title: '生成时间', dataIndex: 'generated_at', key: 'time',
+      render: (v: string) => v ? new Date(v).toLocaleDateString() : '-',
+    },
+    {
+      title: '操作', key: 'action',
+      render: (_: any, r: FitReport) => (
+        <button className="btn-link" onClick={() => setSelected(r)}>
+          <EyeOutlined /> 查看详情
+        </button>
+      ),
+    },
   ]
 
   return (
     <>
-      <Card title="适岗分析报告">
+      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e293b', margin: '0 0 20px' }}>适岗分析报告</h2>
+      <div className="glass-card" style={{ padding: 24 }}>
         <Table dataSource={reports} columns={cols} rowKey="id" pagination={false} />
-      </Card>
+      </div>
       {selected && <FitReportDetail report={selected} onClose={() => setSelected(null)} />}
     </>
   )
