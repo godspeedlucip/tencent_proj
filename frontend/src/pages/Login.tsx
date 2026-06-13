@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Form, Input, Button, Card, message } from 'antd'
+import { Form, Input, Button, message } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { auth } from '../services/api'
@@ -29,31 +29,84 @@ export default function LoginPage() {
     <div style={{
       minHeight: '100vh',
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      backgroundImage: 'url(/cover.png), linear-gradient(135deg, rgba(102,126,234,0.85) 0%, rgba(118,75,162,0.85) 100%)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
     }}>
-      <Card style={{ width: 400, borderRadius: 12, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: 32, fontSize: '1.3rem', fontWeight: 700, color: '#1e293b' }}>
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 48,
+      }}>
+        <h1 style={{
+          color: '#fff',
+          fontSize: '2.2rem',
+          fontWeight: 700,
+          textShadow: '0 2px 12px rgba(0,0,0,0.3)',
+          margin: 0,
+        }}>
           实习能量站
-        </h2>
-        <Form onFinish={onFinish} size="large">
-          <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
-            <Input prefix={<UserOutlined />} placeholder="用户名" />
-          </Form.Item>
-          <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
-            <Input.Password prefix={<LockOutlined />} placeholder="密码" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>
-              登录
-            </Button>
-          </Form.Item>
-        </Form>
-        <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>
-          测试账号：intern1 / mentor1 / hr1 / recruiter1 / 密码均 pass123
+        </h1>
+        <p style={{
+          color: 'rgba(255,255,255,0.85)',
+          fontSize: '1rem',
+          marginTop: 16,
+          textShadow: '0 1px 8px rgba(0,0,0,0.3)',
+        }}>
+          AI 驱动的实习生成长导航系统
         </p>
-      </Card>
+      </div>
+
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 48,
+      }}>
+        <div style={{
+          width: 400,
+          background: 'rgba(255,255,255,0.12)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: 12,
+          padding: '36px 32px',
+        }}>
+          <h2 style={{
+            textAlign: 'center',
+            marginBottom: 32,
+            fontSize: '1.3rem',
+            fontWeight: 700,
+            color: '#fff',
+          }}>
+            登录
+          </h2>
+          <Form onFinish={onFinish} size="large">
+            <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
+              <Input prefix={<UserOutlined />} placeholder="用户名" />
+            </Form.Item>
+            <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
+              <Input.Password prefix={<LockOutlined />} placeholder="密码" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={loading} block>
+                登录
+              </Button>
+            </Form.Item>
+          </Form>
+          <p style={{
+            textAlign: 'center',
+            color: 'rgba(255,255,255,0.6)',
+            fontSize: '0.8rem',
+          }}>
+            测试账号：intern1 / mentor1 / hr1 / recruiter1 / 密码均 pass123
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
