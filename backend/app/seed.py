@@ -1,11 +1,9 @@
-from passlib.context import CryptContext
+import bcrypt
 from .models import Base, engine, SessionLocal
 from .models.user import User, RoleType
 from .models.mentor import Mentor
 from .models.intern import Intern
 from .models.task import Task, TaskType, TaskPriority, TaskStatus
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def seed():
@@ -17,10 +15,11 @@ def seed():
         db.close()
         return
 
-    mentor_user = User(id="user-mentor-1", username="mentor1", hashed_password=pwd_context.hash("pass123"), role=RoleType.mentor)
-    intern_user = User(id="user-intern-1", username="intern1", hashed_password=pwd_context.hash("pass123"), role=RoleType.intern)
-    hr_user = User(id="user-hr-1", username="hr1", hashed_password=pwd_context.hash("pass123"), role=RoleType.hr)
-    recruiter_user = User(id="user-recruiter-1", username="recruiter1", hashed_password=pwd_context.hash("pass123"), role=RoleType.recruiter)
+    pw = bcrypt.hashpw(b"pass123", bcrypt.gensalt()).decode()
+    mentor_user = User(id="user-mentor-1", username="mentor1", hashed_password=pw, role=RoleType.mentor)
+    intern_user = User(id="user-intern-1", username="intern1", hashed_password=pw, role=RoleType.intern)
+    hr_user = User(id="user-hr-1", username="hr1", hashed_password=pw, role=RoleType.hr)
+    recruiter_user = User(id="user-recruiter-1", username="recruiter1", hashed_password=pw, role=RoleType.recruiter)
     db.add_all([mentor_user, intern_user, hr_user, recruiter_user])
     db.flush()
 

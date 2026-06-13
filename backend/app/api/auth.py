@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
-from passlib.context import CryptContext
+import bcrypt
 from ..models import SessionLocal
 from ..models.user import User, RoleType
 from ..models.mentor import Mentor
@@ -8,7 +8,14 @@ from ..models.intern import Intern
 from ..middleware.jwt import create_token
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
 
 class LoginRequest(BaseModel):
@@ -27,7 +34,7 @@ def login(req: LoginRequest):
     db = SessionLocal()
     try:
         user = db.query(User).filter(User.username == req.username).first()
-        if not user or not pwd_context.verify(req.password, user.hashed_password):
+        if not user or not verify_password(req.password, user.hashed_password):
             raise HTTPException(401, "Invalid username or password")
         if not user.is_active:
             raise HTTPException(403, "Account is disabled")
@@ -65,7 +72,7 @@ def register(req: RegisterRequest):
 
         user = User(
             username=req.username,
-            hashed_password=pwd_context.hash(req.password),
+            hashed_password=hash_password(req.password),
             role=RoleType(req.role),
         )
         db.add(user)
