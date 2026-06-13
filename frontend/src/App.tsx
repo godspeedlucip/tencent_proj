@@ -15,6 +15,7 @@ import TaskTemplates from './pages/mentor/TaskTemplates'
 import HRLayout from './pages/hr/HRLayout'
 import InternManage from './pages/hr/InternManage'
 import MentorManage from './pages/hr/MentorManage'
+import InternDetail from './pages/hr/InternDetail'
 import NotificationBell from './components/NotificationBell'
 
 const antTheme = {
@@ -58,6 +59,7 @@ function AppShell() {
                 <Route path="dashboard" element={<HRRiskBoard />} />
                 <Route path="analytics" element={<HRAnalytics />} />
                 <Route path="interns" element={<InternManage />} />
+                <Route path="interns/:id" element={<InternDetail />} />
                 <Route path="mentors" element={<MentorManage />} />
               </Route>
               <Route path="/recruiter" element={<RecruiterFitReportList />} />
