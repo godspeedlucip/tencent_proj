@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from ..models import SessionLocal
 from ..models.intern import Intern
-from ..models.task import Task
+from ..models.task import Task, TaskStatus
 from ..models.checkin import CheckIn
 from ..services.intern_service import get_intern, submit_checkin, detect_duplicate_checkin
 
@@ -21,11 +21,23 @@ def list_interns(status: str | None = Query(None), mentor_id: str | None = Query
         interns = q.all()
         result = []
         for intern in interns:
+            tasks = db.query(Task).filter(Task.intern_id == intern.id).all()
+            completed = sum(1 for t in tasks if t.status == TaskStatus.completed)
+            task_rate = round(completed / len(tasks), 2) if tasks else 0
+
+            last_checkin = (
+                db.query(CheckIn).filter(CheckIn.intern_id == intern.id)
+                .order_by(CheckIn.submitted_at.desc()).first()
+            )
+            last_emotion = last_checkin.emotion_capsule.value if last_checkin else None
+
             result.append({
                 "id": intern.id, "name": intern.name, "role": intern.role,
                 "department": intern.department, "mentor_name": intern.mentor.name if intern.mentor else "",
+                "mentor_id": intern.mentor_id,
                 "onboard_week": intern.onboard_week, "status": intern.status.value,
-                "task_completion_rate": 0.8, "last_emotion": None,
+                "task_completion_rate": task_rate,
+                "last_emotion": last_emotion,
             })
         dist = {}
         for s in ["normal", "potential", "watch", "risk"]:
@@ -65,10 +77,17 @@ def get_intern_checkins(intern_id: str, week: int | None = Query(None)):
         if week:
             q = q.filter(CheckIn.week == week)
         checkins = q.order_by(CheckIn.submitted_at.desc()).all()
+        from ..models.mentor_feedback import MentorFeedback
         return {"checkins": [
-            {"id": c.id, "week": c.week, "progress": c.progress, "blockers": c.blockers,
-             "emotion_capsule": c.emotion_capsule.value, "next_plan": c.next_plan,
-             "submitted_at": c.submitted_at.isoformat(), "has_feedback": False}
+            {
+                "id": c.id, "week": c.week, "progress": c.progress, "blockers": c.blockers,
+                "emotion_capsule": c.emotion_capsule.value, "next_plan": c.next_plan,
+                "submitted_at": c.submitted_at.isoformat(),
+                "has_feedback": db.query(MentorFeedback).filter(
+                    MentorFeedback.intern_id == intern_id,
+                    MentorFeedback.checkin_id == c.id,
+                ).count() > 0,
+            }
             for c in checkins
         ]}
     finally:
