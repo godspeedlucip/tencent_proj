@@ -145,3 +145,100 @@ def delete_template(template_id: str, mentor_id: str = "default"):
 def pending_reviews(mentor_id: str):
     from ..services.mentor_service import get_pending_reviews
     return get_pending_reviews(mentor_id)
+
+
+# --- Deadline ---
+
+class DeadlineRequest(BaseModel):
+    day_of_week: int  # 0=Mon..6=Sun
+    hour: int         # 0-23
+
+
+@router.post("/deadline")
+def set_deadline_endpoint(req: DeadlineRequest, mentor_id: str = "default"):
+    from ..services.mentor_service import set_deadline
+    if not (0 <= req.day_of_week <= 6):
+        raise HTTPException(400, "day_of_week must be 0-6")
+    if not (0 <= req.hour <= 23):
+        raise HTTPException(400, "hour must be 0-23")
+    return set_deadline(mentor_id, req.day_of_week, req.hour)
+
+
+@router.get("/{mentor_id}/deadline")
+def get_deadline(mentor_id: str):
+    from ..services.mentor_service import get_or_create_deadline
+    return get_or_create_deadline(mentor_id)
+
+
+# --- Baseline ---
+
+class BaselineRequest(BaseModel):
+    scores: dict[str, int]
+
+
+@router.post("/interns/{intern_id}/baseline")
+def submit_baseline_endpoint(intern_id: str, req: BaselineRequest, mentor_id: str = "default"):
+    from ..services.mentor_service import submit_baseline
+    expected_dims = ["业务理解", "需求分析", "协作沟通", "交付质量"]
+    for dim in expected_dims:
+        if dim not in req.scores:
+            raise HTTPException(400, f"Missing dimension: {dim}")
+        if not (1 <= req.scores[dim] <= 5):
+            raise HTTPException(400, f"{dim} score must be 1-5")
+    result = submit_baseline(mentor_id, intern_id, req.scores)
+    if result.get("error"):
+        raise HTTPException(404, result["error"])
+    return result
+
+
+# --- Intern detail views for mentor ---
+
+@router.get("/{mentor_id}/interns/{intern_id}/tasks")
+def get_intern_tasks_for_mentor(mentor_id: str, intern_id: str):
+    from ..models import SessionLocal
+    from ..models.task import Task
+    from ..models.intern import Intern
+    db = SessionLocal()
+    try:
+        intern = db.query(Intern).filter(Intern.id == intern_id, Intern.mentor_id == mentor_id).first()
+        if not intern:
+            raise HTTPException(404, "Intern not found")
+        tasks = db.query(Task).filter(Task.intern_id == intern_id).all()
+        return {"tasks": [
+            {
+                "id": t.id, "title": t.title, "type": t.type.value, "priority": t.priority.value,
+                "status": t.status.value, "due_date": t.due_date.isoformat() if t.due_date else None,
+                "score": t.score, "approval_status": t.approval_status.value if t.approval_status else "pending",
+                "report_md": t.report_md,
+            }
+            for t in tasks
+        ]}
+    finally:
+        db.close()
+
+
+@router.get("/{mentor_id}/interns/{intern_id}/checkins")
+def get_intern_checkins_for_mentor(mentor_id: str, intern_id: str):
+    from ..models import SessionLocal
+    from ..models.checkin import CheckIn
+    from ..models.intern import Intern
+    from ..services.mentor_service import compute_is_late
+    db = SessionLocal()
+    try:
+        intern = db.query(Intern).filter(Intern.id == intern_id, Intern.mentor_id == mentor_id).first()
+        if not intern:
+            raise HTTPException(404, "Intern not found")
+        checkins = db.query(CheckIn).filter(CheckIn.intern_id == intern_id).order_by(CheckIn.submitted_at.desc()).all()
+        return {"checkins": [
+            {
+                "id": c.id, "week": c.week, "progress": c.progress,
+                "blockers": c.blockers, "emotion_capsule": c.emotion_capsule.value,
+                "next_plan": c.next_plan, "weekly_report_md": c.weekly_report_md,
+                "mentor_score": c.mentor_score, "mentor_comment": c.mentor_comment,
+                "submitted_at": c.submitted_at.isoformat(),
+                "is_late": compute_is_late(c.submitted_at, mentor_id),
+            }
+            for c in checkins
+        ]}
+    finally:
+        db.close()
