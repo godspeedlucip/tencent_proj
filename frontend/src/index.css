@@ -198,8 +198,7 @@ body {
   background-image: url('/cover.png');
   background-size: cover;
   background-position: center;
-  filter: blur(2px);
-  z-index: 0;
+    z-index: 0;
 }
 
 .login-page::after {
