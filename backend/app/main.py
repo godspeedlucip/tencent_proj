@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .models import Base, engine
-from .api import auth, interns, mentors, hr, recruiters, ai
+from .api import auth, interns, mentors, hr, recruiters, ai, notifications
 
 Base.metadata.create_all(bind=engine)
 
@@ -21,3 +21,4 @@ app.include_router(mentors.router, prefix="/api/v1/mentor", tags=["Mentors"])
 app.include_router(hr.router, prefix="/api/v1/hr", tags=["HR"])
 app.include_router(recruiters.router, prefix="/api/v1/recruiter", tags=["Recruiters"])
 app.include_router(ai.router, prefix="/api/v1/ai", tags=["AI"])
+app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["Notifications"])
