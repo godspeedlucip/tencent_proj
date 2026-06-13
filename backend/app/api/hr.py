@@ -8,7 +8,7 @@ from ..models.task import Task, TaskStatus
 from ..models.checkin import CheckIn
 from ..models.risk_signal import RiskSignal, ReviewStatus
 from ..models.mentor import Mentor
-from ..models.mentor_feedback import MentorFeedback
+from ..models.mentor_feedback import MentorFeedback, VoteType
 from ..services.hr_service import get_dashboard, get_weekly_report, set_proxy_mentor
 
 router = APIRouter()
@@ -136,5 +136,41 @@ def export_data(format: str = "csv"):
             media_type="text/csv",
             headers={"Content-Disposition": "attachment; filename=intern_report.csv"},
         )
+    finally:
+        db.close()
+
+
+@router.get("/mentor-performance")
+def get_mentor_performance():
+    db = SessionLocal()
+    try:
+        mentors_list = db.query(Mentor).filter(Mentor.role_type == "mentor").all()
+        result = []
+        for m in mentors_list:
+            mentee_ids = [i.id for i in m.interns]
+            if not mentee_ids:
+                continue
+
+            feedbacks = db.query(MentorFeedback).filter(MentorFeedback.intern_id.in_(mentee_ids)).all()
+            checkins_m = db.query(CheckIn).filter(CheckIn.intern_id.in_(mentee_ids)).all()
+
+            growth_vals = []
+            for i in m.interns:
+                if i.baseline_scores and i.current_scores:
+                    diffs = [i.current_scores[k] - i.baseline_scores.get(k, 0) for k in i.current_scores]
+                    growth_vals.append(sum(diffs) / len(diffs) if diffs else 0)
+
+            overrides = sum(1 for f in feedbacks if f.ai_suggestion_vote == VoteType.downvote)
+            override_rate = round(overrides / len(feedbacks) * 100, 1) if feedbacks else 0
+
+            result.append({
+                "mentor_name": m.name,
+                "intern_count": len(m.interns),
+                "feedback_coverage_pct": round(len(feedbacks) / len(checkins_m) * 100, 1) if checkins_m else 0,
+                "avg_mentee_growth": round(sum(growth_vals) / len(growth_vals), 1) if growth_vals else 0,
+                "ai_override_rate": override_rate,
+                "at_risk_count": sum(1 for i in m.interns if i.status.value in ("watch", "risk")),
+            })
+        return result
     finally:
         db.close()
