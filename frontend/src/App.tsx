@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Layout, Spin, message } from 'antd'
+import { ConfigProvider, Spin, message } from 'antd'
 import type { Role } from './types'
 import { auth, setRole as setApiRole } from './services/api'
 import RoleSwitcher from './components/RoleSwitcher'
@@ -9,7 +9,13 @@ import MentorDashboard from './pages/mentor/Dashboard'
 import HRDashboard from './pages/hr/RiskBoard'
 import RecruiterFitReportList from './pages/recruiter/FitReportList'
 
-const { Header, Content } = Layout
+const antTheme = {
+  token: {
+    colorPrimary: '#f59e0b',
+    borderRadius: 8,
+    colorBgContainer: 'rgba(255,255,255,0.6)',
+  },
+}
 
 export default function App() {
   const [role, setRole] = useState<Role>('intern')
@@ -48,15 +54,21 @@ export default function App() {
   }
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <ConfigProvider theme={antTheme}>
       <PrivacyModal />
-      <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', borderBottom: '1px solid #f0f0f0', padding: '0 24px' }}>
-        <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>实习能量站</h1>
-        <RoleSwitcher currentRole={role} onSwitch={handleRoleSwitch} />
-      </Header>
-      <Content style={{ padding: 24, background: '#f5f5f5' }}>
-        {renderPage()}
-      </Content>
-    </Layout>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <nav className="glass-nav" style={{ padding: '12px 24px' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span className="gradient-text" style={{ fontSize: '1.1rem', fontWeight: 800 }}>实习能量站</span>
+            <RoleSwitcher currentRole={role} onSwitch={handleRoleSwitch} />
+          </div>
+        </nav>
+        <main style={{ flex: 1, padding: 24 }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            {renderPage()}
+          </div>
+        </main>
+      </div>
+    </ConfigProvider>
   )
 }
