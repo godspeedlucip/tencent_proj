@@ -1,0 +1,113 @@
+<h2>组件改造 — 卡片 · 统计 · 标签 · 按钮</h2>
+<p class="subtitle">自定义样式替代 Ant Design 默认视觉，保留复杂组件（Table/Modal/Select）</p>
+
+<div class="section">
+  <h3>1. 统计卡片 (替代 Ant Design Statistic)</h3>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+    <div style="background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3);text-align:center">
+      <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:4px">任务完成率</div>
+      <div style="font-size:2rem;font-weight:800;color:#f59e0b">85<span style="font-size:1rem">%</span></div>
+      <div style="font-size:0.75rem;color:#10b981;margin-top:4px">↑ 12% vs 上周</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3);text-align:center">
+      <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:4px">能力提升维度</div>
+      <div style="font-size:2rem;font-weight:800;color:#3b82f6">3<span style="font-size:1rem">/4</span></div>
+      <div style="font-size:0.75rem;color:#94a3b8;margin-top:4px">基线对比</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3);text-align:center">
+      <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:4px">核心评分</div>
+      <div style="font-size:2rem;font-weight:800;color:#10b981">4.2<span style="font-size:1rem">/5</span></div>
+      <div style="font-size:0.75rem;color:#94a3b8;margin-top:4px">第 3 周</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3);text-align:center">
+      <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:4px">本周任务</div>
+      <div style="font-size:2rem;font-weight:800;color:#8b5cf6">5<span style="font-size:1rem">个</span></div>
+      <div style="font-size:0.75rem;color:#ef4444;margin-top:4px">2 个临近截止</div>
+    </div>
+  </div>
+  <p style="font-size:0.75rem;color:#94a3b8;margin-top:12px">
+    颜色语义：amber=主要指标 / blue=成长 / green=正向 / red=警告 / purple=任务
+  </p>
+</div>
+
+<div class="section">
+  <h3>2. 状态标签 (替代 Ant Design Tag)</h3>
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+    <span style="background:rgba(16,185,129,0.1);color:#065f46;padding:3px 12px;border-radius:14px;font-size:0.8rem;font-weight:500;border:1px solid rgba(16,185,129,0.2)">✓ 正常</span>
+    <span style="background:rgba(59,130,246,0.1);color:#1e40af;padding:3px 12px;border-radius:14px;font-size:0.8rem;font-weight:500;border:1px solid rgba(59,130,246,0.2)">◆ 高潜</span>
+    <span style="background:rgba(245,158,11,0.1);color:#92400e;padding:3px 12px;border-radius:14px;font-size:0.8rem;font-weight:500;border:1px solid rgba(245,158,11,0.2)">◈ 需关注</span>
+    <span style="background:rgba(239,68,68,0.1);color:#991b1b;padding:3px 12px;border-radius:14px;font-size:0.8rem;font-weight:500;border:1px solid rgba(239,68,68,0.2)">⚠ 高风险</span>
+    <span style="color:#94a3b8;font-size:0.8rem">← 与 index.html 的 skill-tag 风格统一</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. 主操作按钮</h3>
+  <div style="display:flex;gap:12px;align-items:center">
+    <button style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(245,158,11,0.3)">填写本周 Check-in</button>
+    <button style="background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);border:1px solid rgba(253,230,138,0.4);padding:10px 24px;border-radius:8px;font-size:0.9rem;font-weight:500;color:#475569;cursor:pointer">一键生成周报</button>
+    <button style="background:transparent;border:none;padding:8px 16px;font-size:0.85rem;color:#f59e0b;font-weight:600;cursor:pointer">查看详情 →</button>
+    <span style="font-size:0.8rem;color:#94a3b8">primary / glass / link</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>4. 进度条 (替代 Ant Design Progress)</h3>
+  <div style="max-width:400px">
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:0.85rem;color:#475569">业务理解</span>
+        <span style="font-size:0.8rem;color:#94a3b8">基线 2 → 当前 4</span>
+      </div>
+      <div style="height:6px;background:rgba(253,230,138,0.3);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:80%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:3px;transition:width 0.6s"></div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:0.85rem;color:#475569">协作沟通</span>
+        <span style="font-size:0.8rem;color:#94a3b8">基线 3 → 当前 4</span>
+      </div>
+      <div style="height:6px;background:rgba(253,230,138,0.3);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:80%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:3px"></div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:0.85rem;color:#475569">需求分析</span>
+        <span style="font-size:0.8rem;color:#94a3b8">基线 2 → 当前 3</span>
+      </div>
+      <div style="height:6px;background:rgba(253,230,138,0.3);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:60%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:3px"></div>
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:0.85rem;color:#475569">交付质量</span>
+        <span style="font-size:0.8rem;color:#94a3b8">基线 2 → 当前 5</span>
+      </div>
+      <div style="height:6px;background:rgba(253,230,138,0.3);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:3px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>5. 改造清单总览</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.3)">
+      <th style="text-align:left;padding:8px;color:#94a3b8">Ant Design 组件</th>
+      <th style="text-align:left;padding:8px;color:#94a3b8">处理方式</th>
+      <th style="text-align:left;padding:8px;color:#94a3b8">说明</th>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px">Card</td><td style="padding:8px;color:#f59e0b">自定义替换</td><td style="padding:8px;color:#64748b">div + glassmorphism CSS</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px">Statistic</td><td style="padding:8px;color:#f59e0b">自定义替换</td><td style="padding:8px;color:#64748b">居中数字 + 趋势副文本</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px">Progress</td><td style="padding:8px;color:#f59e0b">自定义替换</td><td style="padding:8px;color:#64748b">渐变进度条 + 基线对比标注</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px">Tag</td><td style="padding:8px;color:#f59e0b">自定义替换</td><td style="padding:8px;color:#64748b">胶囊样式，与 index.html skill-tag 统一</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px">Button</td><td style="padding:8px;color:#f59e0b">自定义替换</td><td style="padding:8px;color:#64748b">渐变主按钮 + 玻璃态次按钮</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px">Table</td><td style="padding:8px;color:#3b82f6">保留 Ant Design</td><td style="padding:8px;color:#64748b">包裹在 glass-card 中，微调表头样式</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px">Modal</td><td style="padding:8px;color:#3b82f6">保留 Ant Design</td><td style="padding:8px;color:#64748b">通过 ConfigProvider 统一主题色</td></tr>
+    <tr><td style="padding:8px">Select / Spin / Alert</td><td style="padding:8px;color:#3b82f6">保留 Ant Design</td><td style="padding:8px;color:#64748b">ConfigProvider 全局主题覆盖</td></tr>
+  </table>
+</div>

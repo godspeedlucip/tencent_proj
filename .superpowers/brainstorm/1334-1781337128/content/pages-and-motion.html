@@ -1,0 +1,127 @@
+<h2>页面改动 & 动效微交互</h2>
+<p class="subtitle">四个角色页面改动范围 + index.html 的动效 DNA 如何迁移</p>
+
+<div class="section">
+  <h3>1. 各页面的改动范围</h3>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card" style="background:rgba(255,255,255,0.6);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3)">
+      <h3 style="font-size:1rem;color:#1e293b;margin:0 0 8px">实习生 Dashboard</h3>
+      <p style="font-size:0.8rem;color:#94a3b8;margin:0 0 12px">改动量：中等</p>
+      <ul style="font-size:0.85rem;color:#475569;padding-left:18px;margin:0">
+        <li>统计卡片 → glass-card 居中数字</li>
+        <li>成长卡片 → 自定义渐变进度条</li>
+        <li>AI 建议卡 → 左侧 amber 色条 + 图标突出</li>
+        <li>Chick-in 按钮 → amber 渐变主按钮</li>
+        <li>页面标题 → "欢迎回来，{name}" 大标题</li>
+      </ul>
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,0.6);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3)">
+      <h3 style="font-size:1rem;color:#1e293b;margin:0 0 8px">导师 Dashboard</h3>
+      <p style="font-size:0.8rem;color:#94a3b8;margin:0 0 12px">改动量：较小</p>
+      <ul style="font-size:0.85rem;color:#475569;padding-left:18px;margin:0">
+        <li>Table 包裹在 glass-card 中</li>
+        <li>状态 Tag 改为胶囊样式</li>
+        <li>操作按钮改为 amber link 风格</li>
+        <li>表头背景透明化</li>
+      </ul>
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,0.6);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3)">
+      <h3 style="font-size:1rem;color:#1e293b;margin:0 0 8px">HR 风险看板</h3>
+      <p style="font-size:0.8rem;color:#94a3b8;margin:0 0 12px">改动量：中等</p>
+      <ul style="font-size:0.85rem;color:#475569;padding-left:18px;margin:0">
+        <li>顶部 4 个统计改为 glass 数字卡片</li>
+        <li>高风险数字红色突出（保留 Warning 图标）</li>
+        <li>周报卡片独立视觉层（与风险列表区分）</li>
+        <li>Modal 详情通过 ConfigProvider 统一风格</li>
+      </ul>
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,0.6);border-radius:12px;padding:20px;border:1px solid rgba(253,230,138,0.3)">
+      <h3 style="font-size:1rem;color:#1e293b;margin:0 0 8px">招聘适岗报告</h3>
+      <p style="font-size:0.8rem;color:#94a3b8;margin:0 0 12px">改动量：较小</p>
+      <ul style="font-size:0.85rem;color:#475569;padding-left:18px;margin:0">
+        <li>Table 包裹在 glass-card 中</li>
+        <li>AI 建议 Tag 改为胶囊样式</li>
+        <li>雷达图保留，容器改为 glass-card</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. 动效与微交互（参考 index.html）</h3>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div style="background:rgba(255,255,255,0.6);border-radius:12px;padding:16px;border:1px solid rgba(253,230,138,0.3)">
+      <h4 style="font-size:0.9rem;color:#1e293b;margin:0 0 8px">卡片 Hover</h4>
+      <p style="font-size:0.8rem;color:#64748b;margin:0">
+        <code>transform: translateY(-2px)</code> + <code>box-shadow</code> 加深<br>
+        <code>transition: 0.3s</code> 平滑过渡<br>
+        ← 直接复制 index.html .proj-card:hover
+      </p>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.6);border-radius:12px;padding:16px;border:1px solid rgba(253,230,138,0.3)">
+      <h4 style="font-size:0.9rem;color:#1e293b;margin:0 0 8px">庆祝动效 (FR-006)</h4>
+      <p style="font-size:0.8rem;color:#64748b;margin:0">
+        连续两周完成率 > 90% 触发<br>
+        轻量 CSS confetti + 卡片金色边框闪烁<br>
+        不引入动画库，纯 CSS animation
+      </p>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.6);border-radius:12px;padding:16px;border:1px solid rgba(253,230,138,0.3)">
+      <h4 style="font-size:0.9rem;color:#1e293b;margin:0 0 8px">页面入场</h4>
+      <p style="font-size:0.8rem;color:#64748b;margin:0">
+        卡片从下向上淡入 (fade-in-up)<br>
+        各卡片 stagger 50ms 依次出现<br>
+        <code>@keyframes fadeInUp</code> 纯 CSS
+      </p>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.6);border-radius:12px;padding:16px;border:1px solid rgba(253,230,138,0.3)">
+      <h4 style="font-size:0.9rem;color:#1e293b;margin:0 0 8px">进度条动画</h4>
+      <p style="font-size:0.8rem;color:#64748b;margin:0">
+        进度条从 0 展开到目标值<br>
+        <code>transition: width 0.6s ease-out</code><br>
+        页面加载时触发一次
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. 不做的</h3>
+  <div style="background:rgba(239,68,68,0.06);border-radius:8px;padding:16px;border:1px solid rgba(239,68,68,0.15)">
+    <ul style="font-size:0.85rem;color:#475569;padding-left:18px;margin:0">
+      <li><strong>不引入动画库</strong>（framer-motion 等）—— 纯 CSS animation 足够</li>
+      <li><strong>不改造页面路由</strong> —— 保持当前条件渲染模式</li>
+      <li><strong>不改变数据流</strong> —— API 调用、状态管理逻辑不变</li>
+      <li><strong>不新增依赖</strong> —— 利用已有的 Tailwind + Ant Design</li>
+      <li><strong>不做移动端适配</strong> —— spec 明确 Desktop only</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <h3>4. 文件改动范围预估</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.3)">
+      <th style="text-align:left;padding:8px;color:#94a3b8">文件</th>
+      <th style="text-align:left;padding:8px;color:#94a3b8">改动类型</th>
+      <th style="text-align:left;padding:8px;color:#94a3b8">说明</th>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px"><code>tailwind.config.js</code></td><td style="padding:8px;color:#f59e0b">扩展</td><td style="padding:8px;color:#64748b">新增 brand/surface 颜色 + glass 阴影</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px"><code>index.css</code></td><td style="padding:8px;color:#f59e0b">重写</td><td style="padding:8px;color:#64748b">渐变背景、glassmorphism 工具类、动画 keyframes</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px"><code>App.tsx</code></td><td style="padding:8px;color:#f59e0b">重写外壳</td><td style="padding:8px;color:#64748b">移除 Ant Design Layout，改用 glass nav + 渐变背景</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px"><code>RoleSwitcher.tsx</code></td><td style="padding:8px;color:#3b82f6">微调</td><td style="padding:8px;color:#64748b">Tag/Select 样式更新</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px"><code>PrivacyModal.tsx</code></td><td style="padding:8px;color:#3b82f6">微调</td><td style="padding:8px;color:#64748b">通过 ConfigProvider 继承主题</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px"><code>Intern/Dashboard.tsx</code></td><td style="padding:8px;color:#f59e0b">重写视觉</td><td style="padding:8px;color:#64748b">卡片、统计、进度条自定义</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px"><code>Mentor/Dashboard.tsx</code></td><td style="padding:8px;color:#3b82f6">微调</td><td style="padding:8px;color:#64748b">Table 容器、Tag、Button 样式</td></tr>
+    <tr style="border-bottom:1px solid rgba(253,230,138,0.1)"><td style="padding:8px"><code>HR/RiskBoard.tsx</code></td><td style="padding:8px;color:#f59e0b">重写视觉</td><td style="padding:8px;color:#64748b">统计卡片、周报卡片</td></tr>
+    <tr><td style="padding:8px"><code>Recruiter/FitReportList.tsx</code></td><td style="padding:8px;color:#3b82f6">微调</td><td style="padding:8px;color:#64748b">Table 容器、Tag 样式</td></tr>
+  </table>
+</div>
