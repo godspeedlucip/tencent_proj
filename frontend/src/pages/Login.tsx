@@ -29,19 +29,18 @@ export default function LoginPage() {
     <div className="login-page">
       <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', marginBottom: 40 }}>
         <h1 style={{
-          color: '#fff',
+          color: '#1e293b',
           fontSize: '2.2rem',
           fontWeight: 700,
-          textShadow: '0 2px 12px rgba(0,0,0,0.3)',
+          textShadow: '0 1px 4px rgba(255,255,255,0.3)',
           margin: 0,
         }}>
           实习能量站
         </h1>
         <p style={{
-          color: 'rgba(255,255,255,0.85)',
+          color: '#475569',
           fontSize: '1rem',
           marginTop: 12,
-          textShadow: '0 1px 8px rgba(0,0,0,0.3)',
         }}>
           AI 驱动的实习生成长导航系统
         </p>
@@ -51,13 +50,11 @@ export default function LoginPage() {
         position: 'relative',
         zIndex: 2,
         width: 400,
-        background: 'rgba(255,255,255,0.15)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.3)',
+        background: 'linear-gradient(135deg, rgba(245,158,11,0.92), rgba(217,119,6,0.92))',
+        border: '1px solid rgba(245,158,11,0.4)',
         borderRadius: 12,
         padding: '36px 32px',
-        boxShadow: '0 0 24px rgba(255,255,255,0.15), 0 0 48px rgba(245,158,11,0.25), 0 8px 32px rgba(0,0,0,0.2)',
+        boxShadow: '0 0 24px rgba(245,158,11,0.2), 0 0 48px rgba(245,158,11,0.3), 0 8px 32px rgba(0,0,0,0.2)',
       }}>
         <h2 style={{
           textAlign: 'center',
@@ -83,7 +80,7 @@ export default function LoginPage() {
         </Form>
         <p style={{
           textAlign: 'center',
-          color: 'rgba(255,255,255,0.6)',
+          color: 'rgba(255,255,255,0.8)',
           fontSize: '0.8rem',
         }}>
           测试账号：intern1 / mentor1 / hr1 / recruiter1 / 密码均 pass123
