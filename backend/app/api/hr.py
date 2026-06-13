@@ -346,6 +346,56 @@ def create_mentor(req: CreateMentorRequest):
         db.close()
 
 
+@router.get("/interns/{intern_id}/detail")
+def get_intern_detail(intern_id: str):
+    from ..models.checkin import CheckIn
+    from ..services.mentor_service import compute_is_late
+
+    db = SessionLocal()
+    try:
+        intern = db.query(Intern).filter(Intern.id == intern_id).first()
+        if not intern:
+            raise HTTPException(404, "Intern not found")
+
+        tasks = db.query(Task).filter(Task.intern_id == intern_id).all()
+        checkins = db.query(CheckIn).filter(CheckIn.intern_id == intern_id).order_by(CheckIn.submitted_at.desc()).all()
+
+        return {
+            "intern": {
+                "id": intern.id, "name": intern.name, "role": intern.role,
+                "department": intern.department,
+                "mentor_name": intern.mentor.name if intern.mentor else "",
+                "mentor_id": intern.mentor_id,
+                "onboard_week": intern.onboard_week, "status": intern.status.value,
+            },
+            "tasks": [
+                {
+                    "id": t.id, "title": t.title, "type": t.type.value,
+                    "priority": t.priority.value, "status": t.status.value,
+                    "score": t.score,
+                    "approval_status": t.approval_status.value if t.approval_status else "pending",
+                    "rejection_reason": t.rejection_reason,
+                    "report_md": t.report_md,
+                    "report_submitted_at": t.report_submitted_at.isoformat() if t.report_submitted_at else None,
+                }
+                for t in tasks
+            ],
+            "checkins": [
+                {
+                    "id": c.id, "week": c.week, "progress": c.progress,
+                    "blockers": c.blockers, "emotion_capsule": c.emotion_capsule.value,
+                    "next_plan": c.next_plan, "weekly_report_md": c.weekly_report_md,
+                    "mentor_score": c.mentor_score, "mentor_comment": c.mentor_comment,
+                    "submitted_at": c.submitted_at.isoformat(),
+                    "is_late": compute_is_late(c.submitted_at, intern.mentor_id) if intern.mentor_id else False,
+                }
+                for c in checkins
+            ],
+        }
+    finally:
+        db.close()
+
+
 @router.get("/interns-all")
 def list_all_interns():
     db = SessionLocal()
