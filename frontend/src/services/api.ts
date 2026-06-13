@@ -1,4 +1,4 @@
-import type { Intern, CheckIn, Task, MentorFeedback, TalkingPoints, AIDailyTip, HRDashboard, WeeklyReport, RiskSignal, FitReport, Notification, AnalyticsData, MentorPerformance } from '../types'
+import type { Intern, CheckIn, Task, MentorFeedback, TalkingPoints, AIDailyTip, HRDashboard, WeeklyReport, RiskSignal, FitReport, Notification, AnalyticsData, MentorPerformance, DeadlineConfig, MentorInternTask, MentorInternCheckin, MentorSummary, HRIntern } from '../types'
 
 const BASE = '/api/v1'
 
@@ -79,6 +79,16 @@ export const mentors = {
     request<{ id: string; score: number }>(`/mentor/checkins/${checkinId}/score`, { method: 'POST', body: JSON.stringify(data) }),
   getTemplates: (mentorId: string) => request<{ templates: import('../types').TaskTemplate[] }>(`/mentor/task-templates?mentor_id=${mentorId}`),
   deleteTemplate: (mentorId: string, templateId: string) => request<{ deleted: boolean }>(`/mentor/task-templates/${templateId}?mentor_id=${mentorId}`, { method: 'DELETE' }),
+  getDeadline: (mentorId: string) =>
+    request<DeadlineConfig>(`/mentor/${mentorId}/deadline`),
+  setDeadline: (data: { day_of_week: number; hour: number }, mentorId?: string) =>
+    request<DeadlineConfig>('/mentor/deadline', { method: 'POST', body: JSON.stringify(data) }),
+  submitBaseline: (internId: string, scores: Record<string, number>) =>
+    request<{ id: string; status: string }>(`/mentor/interns/${internId}/baseline`, { method: 'POST', body: JSON.stringify({ scores }) }),
+  getInternTasks: (mentorId: string, internId: string) =>
+    request<{ tasks: MentorInternTask[] }>(`/mentor/${mentorId}/interns/${internId}/tasks`),
+  getInternCheckins: (mentorId: string, internId: string) =>
+    request<{ checkins: MentorInternCheckin[] }>(`/mentor/${mentorId}/interns/${internId}/checkins`),
 }
 
 // Recruiters
@@ -98,6 +108,16 @@ export const hr = {
     request<{ status: string }>(`/hr/risks/${riskId}/review`, { method: 'POST', body: JSON.stringify({ review_status: reviewStatus, review_note: reviewNote }) }),
   getMentorPerformance: () => request<MentorPerformance[]>('/hr/mentor-performance'),
   exportData: (format: string) => request<Blob>(`/hr/export?format=${format}`),
+  createIntern: (data: { name: string; role: string; department: string; mentor_id: string }) =>
+    request<HRIntern>('/hr/interns', { method: 'POST', body: JSON.stringify(data) }),
+  deleteIntern: (internId: string) =>
+    request<{ deleted: boolean }>(`/hr/interns/${internId}`, { method: 'DELETE' }),
+  assignMentor: (internId: string, mentorId: string) =>
+    request<{ intern_id: string; mentor_id: string }>(`/hr/interns/${internId}/mentor`, { method: 'PUT', body: JSON.stringify({ mentor_id: mentorId }) }),
+  listAllInterns: () =>
+    request<{ interns: HRIntern[] }>('/hr/interns-all'),
+  listMentors: () =>
+    request<{ mentors: MentorSummary[] }>('/hr/mentors'),
 }
 
 // Notifications

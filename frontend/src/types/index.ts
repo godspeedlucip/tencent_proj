@@ -221,3 +221,50 @@ export interface GrowthTimeline {
   scores_over_time: GrowthTimelinePoint[]
   milestones: GrowthMilestone[]
 }
+
+export interface DeadlineConfig {
+  id: string
+  mentor_id: string
+  day_of_week: number
+  hour: number
+}
+
+export interface MentorInternTask extends Task {
+  score: number | null
+  approval_status: string
+  report_md: string | null
+}
+
+export interface MentorInternCheckin {
+  id: string
+  week: number
+  progress: string
+  blockers: string | null
+  emotion_capsule: string
+  next_plan: string | null
+  weekly_report_md: string | null
+  mentor_score: number | null
+  mentor_comment: string | null
+  submitted_at: string
+  is_late: boolean
+}
+
+export interface MentorSummary {
+  id: string
+  name: string
+  department: string
+  intern_count: number
+  feedback_coverage_pct: number
+  at_risk_count: number
+}
+
+export interface HRIntern {
+  id: string
+  name: string
+  role: string
+  department: string
+  mentor_id: string
+  mentor_name: string
+  onboard_week: number
+  status: string
+}
