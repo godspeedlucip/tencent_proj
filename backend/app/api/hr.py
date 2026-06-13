@@ -205,9 +205,31 @@ def create_intern(req: CreateInternRequest):
         mentor = db.query(Mentor).filter(Mentor.id == req.mentor_id).first()
         if not mentor:
             raise HTTPException(404, "Mentor not found")
+
+        username = _generate_username(req.name)
+        password = _generate_password()
+
+        # Retry on username collision
+        for _ in range(5):
+            existing = db.query(User).filter(User.username == username).first()
+            if not existing:
+                break
+            username = _generate_username(req.name)
+        else:
+            raise HTTPException(500, "Failed to generate unique username")
+
+        user = User(
+            username=username,
+            hashed_password=hash_password(password),
+            role=RoleType.intern,
+        )
+        db.add(user)
+        db.flush()
+
         intern = Intern(
             name=req.name, role=req.role, department=req.department,
-            mentor_id=req.mentor_id, onboard_week=1, status=InternStatus.normal,
+            mentor_id=req.mentor_id, user_id=user.id,
+            onboard_week=1, status=InternStatus.normal,
         )
         db.add(intern)
         db.commit()
@@ -217,6 +239,7 @@ def create_intern(req: CreateInternRequest):
             "department": intern.department, "mentor_id": intern.mentor_id,
             "mentor_name": intern.mentor.name if intern.mentor else "",
             "onboard_week": intern.onboard_week, "status": intern.status.value,
+            "credentials": {"username": username, "password": password},
         }
     finally:
         db.close()
