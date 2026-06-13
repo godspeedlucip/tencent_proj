@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Modal, Form, Input, Select, Popconfirm, message, Space, Tag } from 'antd'
+import { useNavigate } from 'react-router-dom'
+import { Table, Button, Modal, Form, Input, Select, Popconfirm, message, Space, Tag, Typography } from 'antd'
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import { hr } from '../../services/api'
 import type { HRIntern, MentorSummary } from '../../types'
@@ -17,6 +18,9 @@ export default function InternManage() {
   const [loading, setLoading] = useState(true)
   const [addOpen, setAddOpen] = useState(false)
   const [form] = Form.useForm()
+  const [credOpen, setCredOpen] = useState(false)
+  const [credentials, setCredentials] = useState<{ username: string; password: string } | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     loadData()
@@ -33,14 +37,22 @@ export default function InternManage() {
 
   async function handleAdd(values: any) {
     try {
-      await hr.createIntern(values)
+      const res = await hr.createIntern(values)
       message.success('实习生已添加')
       setAddOpen(false)
       form.resetFields()
+      setCredentials(res.credentials)
+      setCredOpen(true)
       loadData()
     } catch (err: any) {
       message.error(err.message || '添加失败')
     }
+  }
+
+  function handleCopyCred() {
+    if (!credentials) return
+    const text = `用户名: ${credentials.username}\n密码: ${credentials.password}`
+    navigator.clipboard.writeText(text).then(() => message.success('已复制'))
   }
 
   async function handleDelete(id: string) {
@@ -80,6 +92,9 @@ export default function InternManage() {
       title: '操作', key: 'action',
       render: (_: any, record: HRIntern) => (
         <Space>
+          <Button size="small" type="link" onClick={() => navigate(`/hr/interns/${record.id}`)}>
+            详情
+          </Button>
           <Select
             size="small"
             style={{ width: 120 }}
@@ -123,6 +138,28 @@ export default function InternManage() {
           </Form.Item>
           <Button type="primary" htmlType="submit" block>确认添加</Button>
         </Form>
+      </Modal>
+
+      <Modal
+        title="实习生已添加"
+        open={credOpen}
+        onCancel={() => setCredOpen(false)}
+        footer={[
+          <Button key="copy" type="primary" onClick={handleCopyCred}>复制凭证</Button>,
+          <Button key="close" onClick={() => setCredOpen(false)}>关闭</Button>,
+        ]}
+      >
+        {credentials && (
+          <div style={{ padding: '16px 0' }}>
+            <Typography.Paragraph style={{ fontSize: '1.05rem', marginBottom: 8 }}>
+              请将以下凭证发送给实习生：
+            </Typography.Paragraph>
+            <div style={{ background: '#f8fafc', borderRadius: 8, padding: 16, fontFamily: 'monospace' }}>
+              <div>用户名：<Typography.Text copyable strong>{credentials.username}</Typography.Text></div>
+              <div style={{ marginTop: 4 }}>密码：<Typography.Text copyable strong>{credentials.password}</Typography.Text></div>
+            </div>
+          </div>
+        )}
       </Modal>
     </>
   )
