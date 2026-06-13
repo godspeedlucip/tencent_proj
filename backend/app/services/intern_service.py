@@ -1,4 +1,6 @@
 """Intern business logic: baseline, tasks, checkins, duplicate detection."""
+from datetime import datetime
+from ..models.task import Task, ApprovalStatus
 import json
 from difflib import SequenceMatcher
 from ..models import SessionLocal
@@ -142,5 +144,20 @@ def submit_checkin_with_ai(intern_id: str, data: dict) -> dict:
             "suggested_actions": analysis.get("data", {}).get("suggested_actions", []),
         }
         return result
+    finally:
+        db.close()
+
+
+def submit_task_report(intern_id: str, task_id: str, report_md: str) -> dict:
+    db = SessionLocal()
+    try:
+        task = db.query(Task).filter(Task.id == task_id, Task.intern_id == intern_id).first()
+        if not task:
+            return {"error": "Task not found"}
+        task.report_md = report_md
+        task.report_submitted_at = datetime.utcnow()
+        task.approval_status = ApprovalStatus.pending
+        db.commit()
+        return {"id": task.id, "status": "pending_review"}
     finally:
         db.close()

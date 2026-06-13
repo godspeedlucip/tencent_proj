@@ -9,6 +9,7 @@ class Base(DeclarativeBase):
     pass
 
 
+from .user import User
 from .intern import Intern
 from .mentor import Mentor
 from .task import Task

@@ -15,6 +15,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from .middleware.jwt import JWTMiddleware
+app.add_middleware(JWTMiddleware)
+
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(interns.router, prefix="/api/v1/interns", tags=["Interns"])
 app.include_router(mentors.router, prefix="/api/v1/mentor", tags=["Mentors"])

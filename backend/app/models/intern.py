@@ -1,9 +1,9 @@
 import uuid
+import enum
 from datetime import datetime
 from sqlalchemy import String, Integer, Enum as SAEnum, JSON, DateTime, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from . import Base
-import enum
 
 
 class InternStatus(str, enum.Enum):
@@ -21,6 +21,7 @@ class Intern(Base):
     role: Mapped[str] = mapped_column(String(100), nullable=False)
     department: Mapped[str] = mapped_column(String(100), nullable=False)
     mentor_id: Mapped[str] = mapped_column(String(36), ForeignKey("mentors.id"), nullable=False)
+    user_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
     onboard_week: Mapped[int] = mapped_column(Integer, default=1)
     status: Mapped[InternStatus] = mapped_column(SAEnum(InternStatus), default=InternStatus.normal)
     baseline_scores: Mapped[dict | None] = mapped_column(JSON, nullable=True)
@@ -28,6 +29,7 @@ class Intern(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
+    user: Mapped["User"] = relationship()
     mentor: Mapped["Mentor"] = relationship(back_populates="interns")
     checkins: Mapped[list["CheckIn"]] = relationship(back_populates="intern", cascade="all, delete-orphan")
     tasks: Mapped[list["Task"]] = relationship(back_populates="intern", cascade="all, delete-orphan")

@@ -133,3 +133,16 @@ def submit_baseline(intern_id: str, req: BaselineRequest):
         return {"id": intern.id, "status": "pending_mentor_review"}
     finally:
         db.close()
+
+
+class TaskReportRequest(BaseModel):
+    report_md: str
+
+
+@router.post("/{intern_id}/tasks/{task_id}/report")
+def submit_task_report(intern_id: str, task_id: str, req: TaskReportRequest):
+    from ..services.intern_service import submit_task_report
+    result = submit_task_report(intern_id, task_id, req.report_md)
+    if result.get("error"):
+        raise HTTPException(404, result["error"])
+    return result

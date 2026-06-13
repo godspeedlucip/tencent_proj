@@ -8,6 +8,7 @@ from ..models.task import Task, TaskStatus
 from ..models.checkin import CheckIn
 from ..models.risk_signal import RiskSignal, ReviewStatus
 from ..models.mentor import Mentor
+from ..models.user import User
 from ..models.mentor_feedback import MentorFeedback, VoteType
 from ..services.hr_service import get_dashboard, get_weekly_report, set_proxy_mentor
 
@@ -96,7 +97,7 @@ def get_analytics():
                 "level": s.level.value,
             })
 
-        mentors_list = db.query(Mentor).filter(Mentor.role_type == "mentor").all()
+        mentors_list = db.query(Mentor).join(User, Mentor.user_id == User.id).filter(User.role == "mentor").all()
         feedback_coverage = []
         for m in mentors_list:
             mentee_ids = [i.id for i in m.interns]
@@ -144,7 +145,7 @@ def export_data(format: str = "csv"):
 def get_mentor_performance():
     db = SessionLocal()
     try:
-        mentors_list = db.query(Mentor).filter(Mentor.role_type == "mentor").all()
+        mentors_list = db.query(Mentor).join(User, Mentor.user_id == User.id).filter(User.role == "mentor").all()
         result = []
         for m in mentors_list:
             mentee_ids = [i.id for i in m.interns]

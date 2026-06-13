@@ -55,3 +55,75 @@ def submit_feedback(intern_id: str, mentor_id: str, data: dict) -> dict:
         return {"id": fb.id}
     finally:
         db.close()
+
+
+from ..models.task import Task, TaskType, TaskPriority, TaskStatus, ApprovalStatus
+from ..models.intern import Intern
+from ..models.checkin import CheckIn
+from datetime import date
+
+
+def create_task(mentor_id: str, data: dict) -> dict:
+    db = SessionLocal()
+    try:
+        task = Task(
+            intern_id=data["intern_id"],
+            title=data["title"],
+            description=data.get("description"),
+            type=TaskType(data["type"]),
+            priority=TaskPriority(data.get("priority", "medium")),
+            due_date=date.fromisoformat(data["due_date"]) if data.get("due_date") else None,
+            creator_id=mentor_id,
+            approval_status=ApprovalStatus.pending,
+        )
+        db.add(task)
+        db.commit()
+        return {"id": task.id, "title": task.title, "status": task.status.value}
+    finally:
+        db.close()
+
+
+def review_task(task_id: str, data: dict) -> dict:
+    db = SessionLocal()
+    try:
+        task = db.query(Task).filter(Task.id == task_id).first()
+        if not task:
+            return {"error": "Task not found"}
+
+        task.approval_status = ApprovalStatus(data["approval"])
+        task.score = data.get("score")
+        task.annotation_json = data.get("annotations")
+        if data["approval"] == "rejected":
+            task.rejection_reason = data.get("rejection_reason")
+            task.status = TaskStatus.in_progress
+        else:
+            task.status = TaskStatus.completed
+
+        db.commit()
+        return {"id": task.id, "approval_status": task.approval_status.value if task.approval_status else "pending"}
+    finally:
+        db.close()
+
+
+def get_pending_reviews(mentor_id: str) -> dict:
+    db = SessionLocal()
+    try:
+        intern_ids = [i.id for i in db.query(Intern).filter(Intern.mentor_id == mentor_id).all()]
+        tasks = (
+            db.query(Task)
+            .filter(Task.intern_id.in_(intern_ids), Task.approval_status == ApprovalStatus.pending, Task.report_md.isnot(None))
+            .all()
+        )
+        return {
+            "tasks": [
+                {
+                    "id": t.id, "title": t.title, "intern_id": t.intern_id,
+                    "intern_name": t.intern.name if t.intern else "",
+                    "report_md": t.report_md,
+                    "report_submitted_at": t.report_submitted_at.isoformat() if t.report_submitted_at else None,
+                }
+                for t in tasks
+            ]
+        }
+    finally:
+        db.close()
