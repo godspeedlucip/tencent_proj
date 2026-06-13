@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from ..models import SessionLocal
-from ..models.intern import Intern
+from ..models.intern import Intern, InternStatus
 from ..models.task import Task, TaskStatus
 from ..models.checkin import CheckIn
 from ..models.risk_signal import RiskSignal, ReviewStatus
@@ -173,5 +173,111 @@ def get_mentor_performance():
                 "at_risk_count": sum(1 for i in m.interns if i.status.value in ("watch", "risk")),
             })
         return result
+    finally:
+        db.close()
+
+
+class CreateInternRequest(BaseModel):
+    name: str
+    role: str
+    department: str
+    mentor_id: str
+
+
+@router.post("/interns")
+def create_intern(req: CreateInternRequest):
+    db = SessionLocal()
+    try:
+        mentor = db.query(Mentor).filter(Mentor.id == req.mentor_id).first()
+        if not mentor:
+            raise HTTPException(404, "Mentor not found")
+        intern = Intern(
+            name=req.name, role=req.role, department=req.department,
+            mentor_id=req.mentor_id, onboard_week=1, status=InternStatus.normal,
+        )
+        db.add(intern)
+        db.commit()
+        db.refresh(intern)
+        return {
+            "id": intern.id, "name": intern.name, "role": intern.role,
+            "department": intern.department, "mentor_id": intern.mentor_id,
+            "mentor_name": intern.mentor.name if intern.mentor else "",
+            "onboard_week": intern.onboard_week, "status": intern.status.value,
+        }
+    finally:
+        db.close()
+
+
+@router.delete("/interns/{intern_id}")
+def delete_intern(intern_id: str):
+    db = SessionLocal()
+    try:
+        intern = db.query(Intern).filter(Intern.id == intern_id).first()
+        if not intern:
+            raise HTTPException(404, "Intern not found")
+        db.delete(intern)
+        db.commit()
+        return {"deleted": True, "id": intern_id}
+    finally:
+        db.close()
+
+
+class AssignMentorRequest(BaseModel):
+    mentor_id: str
+
+
+@router.put("/interns/{intern_id}/mentor")
+def assign_mentor(intern_id: str, req: AssignMentorRequest):
+    db = SessionLocal()
+    try:
+        intern = db.query(Intern).filter(Intern.id == intern_id).first()
+        if not intern:
+            raise HTTPException(404, "Intern not found")
+        mentor = db.query(Mentor).filter(Mentor.id == req.mentor_id).first()
+        if not mentor:
+            raise HTTPException(404, "Mentor not found")
+        intern.mentor_id = req.mentor_id
+        db.commit()
+        return {"intern_id": intern_id, "mentor_id": req.mentor_id, "mentor_name": mentor.name}
+    finally:
+        db.close()
+
+
+@router.get("/mentors")
+def list_mentors():
+    db = SessionLocal()
+    try:
+        mentors_list = db.query(Mentor).join(User, Mentor.user_id == User.id).filter(User.role == "mentor").all()
+        result = []
+        for m in mentors_list:
+            mentee_ids = [i.id for i in m.interns]
+            checkin_count = db.query(CheckIn).filter(CheckIn.intern_id.in_(mentee_ids)).count() if mentee_ids else 0
+            feedback_count = db.query(MentorFeedback).filter(MentorFeedback.intern_id.in_(mentee_ids)).count() if mentee_ids else 0
+            at_risk = sum(1 for i in m.interns if i.status.value in ("watch", "risk"))
+            result.append({
+                "id": m.id, "name": m.name, "department": m.department,
+                "intern_count": len(m.interns),
+                "feedback_coverage_pct": round(feedback_count / checkin_count * 100, 1) if checkin_count else 0,
+                "at_risk_count": at_risk,
+            })
+        return {"mentors": result}
+    finally:
+        db.close()
+
+
+@router.get("/interns-all")
+def list_all_interns():
+    db = SessionLocal()
+    try:
+        interns = db.query(Intern).all()
+        return {"interns": [
+            {
+                "id": i.id, "name": i.name, "role": i.role,
+                "department": i.department, "mentor_id": i.mentor_id,
+                "mentor_name": i.mentor.name if i.mentor else "",
+                "onboard_week": i.onboard_week, "status": i.status.value,
+            }
+            for i in interns
+        ]}
     finally:
         db.close()
