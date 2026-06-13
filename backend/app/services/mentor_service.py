@@ -5,6 +5,8 @@ from ..models.task import Task, TaskStatus
 from ..models.checkin import CheckIn
 from ..models.mentor_feedback import MentorFeedback
 from ..models.task_template import TaskTemplate
+from ..models.weekly_report_deadline import WeeklyReportDeadline
+from datetime import datetime, timedelta
 
 
 def get_mentor_interns(mentor_id: str) -> list[dict]:
@@ -194,5 +196,69 @@ def delete_template(mentor_id: str, template_id: str) -> dict:
         db.delete(tmpl)
         db.commit()
         return {"id": template_id, "deleted": True}
+    finally:
+        db.close()
+
+
+def get_or_create_deadline(mentor_id: str) -> dict:
+    db = SessionLocal()
+    try:
+        dl = db.query(WeeklyReportDeadline).filter(WeeklyReportDeadline.mentor_id == mentor_id).first()
+        if not dl:
+            dl = WeeklyReportDeadline(mentor_id=mentor_id)
+            db.add(dl)
+            db.commit()
+            db.refresh(dl)
+        return {"id": dl.id, "mentor_id": dl.mentor_id, "day_of_week": dl.day_of_week, "hour": dl.hour}
+    finally:
+        db.close()
+
+
+def set_deadline(mentor_id: str, day_of_week: int, hour: int) -> dict:
+    db = SessionLocal()
+    try:
+        dl = db.query(WeeklyReportDeadline).filter(WeeklyReportDeadline.mentor_id == mentor_id).first()
+        if dl:
+            dl.day_of_week = day_of_week
+            dl.hour = hour
+        else:
+            dl = WeeklyReportDeadline(mentor_id=mentor_id, day_of_week=day_of_week, hour=hour)
+            db.add(dl)
+        db.commit()
+        db.refresh(dl)
+        return {"id": dl.id, "mentor_id": dl.mentor_id, "day_of_week": dl.day_of_week, "hour": dl.hour}
+    finally:
+        db.close()
+
+
+def compute_is_late(checkin_submitted_at: datetime, mentor_id: str) -> bool:
+    """Check if a checkin was submitted after the mentor's deadline for its week."""
+    db = SessionLocal()
+    try:
+        dl = db.query(WeeklyReportDeadline).filter(WeeklyReportDeadline.mentor_id == mentor_id).first()
+        if not dl:
+            return False
+        submitted = checkin_submitted_at.replace(tzinfo=None) if checkin_submitted_at.tzinfo else checkin_submitted_at
+        days_until_deadline = (dl.day_of_week - submitted.weekday()) % 7
+        deadline = (submitted + timedelta(days=days_until_deadline)).replace(
+            hour=dl.hour, minute=0, second=0, microsecond=0
+        )
+        if deadline < submitted:
+            deadline += timedelta(days=7)
+        return submitted > deadline
+    finally:
+        db.close()
+
+
+def submit_baseline(mentor_id: str, intern_id: str, scores: dict[str, int]) -> dict:
+    db = SessionLocal()
+    try:
+        intern = db.query(Intern).filter(Intern.id == intern_id, Intern.mentor_id == mentor_id).first()
+        if not intern:
+            return {"error": "Intern not found or not under this mentor"}
+        intern.baseline_scores = dict(scores)
+        intern.current_scores = dict(scores)
+        db.commit()
+        return {"id": intern.id, "baseline_scores": intern.baseline_scores, "status": "submitted"}
     finally:
         db.close()
