@@ -109,7 +109,7 @@ export const hr = {
   getMentorPerformance: () => request<MentorPerformance[]>('/hr/mentor-performance'),
   exportData: (format: string) => request<Blob>(`/hr/export?format=${format}`),
   createIntern: (data: { name: string; role: string; department: string; mentor_id: string }) =>
-    request<HRIntern>('/hr/interns', { method: 'POST', body: JSON.stringify(data) }),
+    request<import('../types').HRCreateInternResponse>('/hr/interns', { method: 'POST', body: JSON.stringify(data) }),
   deleteIntern: (internId: string) =>
     request<{ deleted: boolean }>(`/hr/interns/${internId}`, { method: 'DELETE' }),
   assignMentor: (internId: string, mentorId: string) =>
@@ -118,6 +118,10 @@ export const hr = {
     request<{ interns: HRIntern[] }>('/hr/interns-all'),
   listMentors: () =>
     request<{ mentors: MentorSummary[] }>('/hr/mentors'),
+  createMentor: (data: { name: string; department: string }) =>
+    request<import('../types').HRCreateMentorResponse>('/hr/mentors', { method: 'POST', body: JSON.stringify(data) }),
+  getInternDetail: (internId: string) =>
+    request<import('../types').HRInternDetail>(`/hr/interns/${internId}/detail`),
 }
 
 // Notifications
