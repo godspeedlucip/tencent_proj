@@ -1,9 +1,11 @@
 """Intern business logic: baseline, tasks, checkins, duplicate detection."""
+import json
 from difflib import SequenceMatcher
 from ..models import SessionLocal
 from ..models.intern import Intern
 from ..models.task import Task, TaskStatus
 from ..models.checkin import CheckIn, EmotionCapsule
+from ..models.risk_signal import RiskSignal, RiskLevel, ReviewStatus
 
 STRESS_MAP = {
     EmotionCapsule.energetic: 2,
@@ -83,5 +85,62 @@ def detect_duplicate_checkin(intern_id: str, progress: str) -> bool:
         if not last:
             return False
         return SequenceMatcher(None, last.progress, progress).ratio() > 0.8
+    finally:
+        db.close()
+
+
+def submit_checkin_with_ai(intern_id: str, data: dict) -> dict:
+    """Submit checkin then run AI analysis, returning analysis results."""
+    result = submit_checkin(intern_id, data)
+    if not result.get("id"):
+        return result
+
+    db = SessionLocal()
+    try:
+        intern = db.query(Intern).filter(Intern.id == intern_id).first()
+        if not intern:
+            return result
+
+        tasks = db.query(Task).filter(Task.intern_id == intern_id).all()
+        completed = sum(1 for t in tasks if t.status == TaskStatus.completed)
+        task_rate = round(completed / len(tasks), 2) if tasks else 0
+
+        context = {
+            "name": intern.name,
+            "role": intern.role,
+            "week": data.get("week"),
+            "task_completion_rate": task_rate,
+            "emotion": data.get("emotion_capsule"),
+        }
+
+        from .ai_service import analyze_checkin
+        analysis = analyze_checkin(data.get("progress", ""), context)
+
+        risk_signals = analysis.get("data", {}).get("risk_signals", [])
+        for sig in risk_signals:
+            if sig.get("severity") == "high":
+                existing = (
+                    db.query(RiskSignal)
+                    .filter(RiskSignal.intern_id == intern_id)
+                    .order_by(RiskSignal.created_at.desc())
+                    .first()
+                )
+                if not existing or existing.review_status != ReviewStatus.pending:
+                    new_signal = RiskSignal(
+                        intern_id=intern_id,
+                        level=RiskLevel.risk,
+                        triggers=[sig.get("evidence", "")],
+                        ai_confidence=0.8,
+                        review_status=ReviewStatus.pending,
+                    )
+                    db.add(new_signal)
+
+        db.commit()
+        result["analysis"] = {
+            "growth_keywords": analysis.get("data", {}).get("growth_keywords", []),
+            "sentiment_summary": analysis.get("data", {}).get("sentiment_summary", ""),
+            "suggested_actions": analysis.get("data", {}).get("suggested_actions", []),
+        }
+        return result
     finally:
         db.close()

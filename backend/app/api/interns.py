@@ -4,7 +4,7 @@ from ..models import SessionLocal
 from ..models.intern import Intern
 from ..models.task import Task, TaskStatus
 from ..models.checkin import CheckIn
-from ..services.intern_service import get_intern, submit_checkin, detect_duplicate_checkin
+from ..services.intern_service import get_intern, submit_checkin, detect_duplicate_checkin, submit_checkin_with_ai
 
 router = APIRouter()
 
@@ -113,7 +113,7 @@ def create_checkin(intern_id: str, req: CheckInRequest):
         db.close()
     if detect_duplicate_checkin(intern_id, req.progress):
         return {"id": "", "warning": "内容与上周高度相似，请确认并非敷衍填写。"}
-    return submit_checkin(intern_id, req.model_dump())
+    return submit_checkin_with_ai(intern_id, req.model_dump())
 
 
 class BaselineRequest(BaseModel):
