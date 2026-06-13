@@ -302,6 +302,50 @@ def list_mentors():
         db.close()
 
 
+class CreateMentorRequest(BaseModel):
+    name: str
+    department: str
+
+
+@router.post("/mentors")
+def create_mentor(req: CreateMentorRequest):
+    db = SessionLocal()
+    try:
+        username = _generate_username(req.name)
+        password = _generate_password()
+
+        for _ in range(5):
+            existing = db.query(User).filter(User.username == username).first()
+            if not existing:
+                break
+            username = _generate_username(req.name)
+        else:
+            raise HTTPException(500, "Failed to generate unique username")
+
+        user = User(
+            username=username,
+            hashed_password=hash_password(password),
+            role=RoleType.mentor,
+        )
+        db.add(user)
+        db.flush()
+
+        mentor = Mentor(
+            name=req.name,
+            department=req.department,
+            user_id=user.id,
+        )
+        db.add(mentor)
+        db.commit()
+        db.refresh(mentor)
+        return {
+            "id": mentor.id, "name": mentor.name, "department": mentor.department,
+            "credentials": {"username": username, "password": password},
+        }
+    finally:
+        db.close()
+
+
 @router.get("/interns-all")
 def list_all_interns():
     db = SessionLocal()
