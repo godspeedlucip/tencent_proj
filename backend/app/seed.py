@@ -4,6 +4,7 @@ from .models.user import User, RoleType
 from .models.mentor import Mentor
 from .models.intern import Intern
 from .models.task import Task, TaskType, TaskPriority, TaskStatus
+from .models.weekly_report_deadline import WeeklyReportDeadline
 
 
 def seed():
@@ -27,6 +28,10 @@ def seed():
     hr = Mentor(id="hr-1", name="李姐", department="HR部", user_id=hr_user.id)
     recruiter = Mentor(id="recruiter-1", name="王招", department="招聘部", user_id=recruiter_user.id)
     db.add_all([mentor, hr, recruiter])
+    db.flush()
+
+    # Create default Friday 18:00 deadline for the mentor
+    db.add(WeeklyReportDeadline(mentor_id=mentor.id, day_of_week=4, hour=18))
     db.flush()
 
     intern = Intern(
