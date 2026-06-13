@@ -36,6 +36,10 @@ export interface Task {
   priority: TaskPriority
   status: TaskStatus
   due_date: string | null
+  description?: string | null
+  approval_status?: string
+  report_md?: string | null
+  score?: number | null
 }
 
 export type EmotionCapsule = 'energetic' | 'steady' | 'blocked' | 'overloaded' | 'motivated'

@@ -104,6 +104,27 @@ def review_task(task_id: str, data: dict) -> dict:
             task.status = TaskStatus.completed
 
         db.commit()
+
+        intern = db.query(Intern).filter(Intern.id == task.intern_id).first()
+        if intern:
+            from .notification_service import create_notification
+            from ..models.notification import NotificationType, NotificationPriority
+            approval = data["approval"]
+            if approval == "approved":
+                title = f"导师通过了你的任务「{task.title}」"
+                body = "任务审批已通过，继续保持！"
+            else:
+                title = f"导师驳回了你的任务「{task.title}」"
+                body = "请根据导师的反馈修改后重新提交"
+            create_notification(
+                recipient_role="intern",
+                recipient_id=intern.id,
+                type_=NotificationType.mentor_nudge,
+                title=title,
+                body=body,
+                priority=NotificationPriority.medium,
+                action_link=f"/intern/tasks/{task_id}/report",
+            )
         return {"id": task.id, "approval_status": task.approval_status.value if task.approval_status else "pending"}
     finally:
         db.close()

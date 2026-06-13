@@ -15,6 +15,7 @@ import TaskTemplates from './pages/mentor/TaskTemplates'
 import HRLayout from './pages/hr/HRLayout'
 import InternManage from './pages/hr/InternManage'
 import MentorManage from './pages/hr/MentorManage'
+import NotificationBell from './components/NotificationBell'
 
 const antTheme = {
   token: {
@@ -34,6 +35,7 @@ function AppShell() {
           <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span className="gradient-text" style={{ fontSize: '1.1rem', fontWeight: 800 }}>实习能量站</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <NotificationBell role={role!} userId={user?.id || ''} />
               <span style={{ color: '#475569', fontSize: '0.85rem' }}>{user?.name} · {role}</span>
               <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '4px 12px' }} onClick={logout}>
                 退出

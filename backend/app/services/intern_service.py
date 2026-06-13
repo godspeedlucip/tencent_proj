@@ -187,6 +187,20 @@ def submit_task_report(intern_id: str, task_id: str, report_md: str) -> dict:
         task.report_submitted_at = datetime.utcnow()
         task.approval_status = ApprovalStatus.pending
         db.commit()
+
+        intern = db.query(Intern).filter(Intern.id == intern_id).first()
+        if intern and intern.mentor_id:
+            from .notification_service import create_notification
+            from ..models.notification import NotificationType, NotificationPriority
+            create_notification(
+                recipient_role="mentor",
+                recipient_id=intern.mentor_id,
+                type_=NotificationType.mentor_nudge,
+                title=f"{intern.name} 提交了任务报告",
+                body=f"任务「{task.title}」报告已提交，请审批",
+                priority=NotificationPriority.medium,
+                action_link=f"/mentor/review/{task_id}",
+            )
         return {"id": task.id, "status": "pending_review"}
     finally:
         db.close()

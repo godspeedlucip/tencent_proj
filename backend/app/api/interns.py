@@ -62,7 +62,11 @@ def get_intern_tasks(intern_id: str):
         tasks = db.query(Task).filter(Task.intern_id == intern_id).all()
         return {"tasks": [
             {"id": t.id, "title": t.title, "type": t.type.value, "priority": t.priority.value,
-             "status": t.status.value, "due_date": t.due_date.isoformat() if t.due_date else None}
+             "status": t.status.value, "due_date": t.due_date.isoformat() if t.due_date else None,
+             "description": t.description,
+             "approval_status": t.approval_status.value if t.approval_status else "pending",
+             "report_md": t.report_md,
+             "score": t.score}
             for t in tasks
         ]}
     finally:
