@@ -17,7 +17,7 @@ export default function TaskReview() {
   const [aiDraft, setAiDraft] = useState<{ highlights: string[]; suggestions: string[]; suggested_score: number } | null>(null)
 
   useEffect(() => {
-    const mentorId = JSON.parse(localStorage.getItem('user') || '{}').id
+    const mentorId = JSON.parse(sessionStorage.getItem('user') || '{}').id
     mentors.getPendingReviews(mentorId).then(r => {
       const t = r.tasks.find((t: any) => t.id === taskId)
       setTask(t || null)

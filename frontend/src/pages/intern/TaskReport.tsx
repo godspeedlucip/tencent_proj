@@ -12,7 +12,7 @@ export default function TaskReport() {
   const [reportMd, setReportMd] = useState('')
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}')
 
   useEffect(() => {
     const internId = user.id

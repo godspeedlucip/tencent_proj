@@ -12,7 +12,7 @@ export default function AssignTask() {
   const [form] = Form.useForm()
 
   useEffect(() => {
-    const mentorId = JSON.parse(localStorage.getItem('user') || '{}').id
+    const mentorId = JSON.parse(sessionStorage.getItem('user') || '{}').id
     mentors.getInterns(mentorId).then(r => {
       setInterns(r.interns)
     }).catch(() => {}).finally(() => setLoading(false))

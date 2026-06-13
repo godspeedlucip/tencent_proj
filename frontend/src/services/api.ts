@@ -3,7 +3,7 @@ import type { Intern, CheckIn, Task, MentorFeedback, TalkingPoints, AIDailyTip, 
 const BASE = '/api/v1'
 
 function getToken(): string | null {
-  return localStorage.getItem('token')
+  return sessionStorage.getItem('token')
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -18,9 +18,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   })
   if (!res.ok) {
     if (res.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('role')
-      localStorage.removeItem('user')
+      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('role')
+      sessionStorage.removeItem('user')
       window.location.href = '/login'
       throw new Error('Session expired')
     }

@@ -1,9 +1,22 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
+from ..models import SessionLocal
+from ..models.mentor import Mentor
 from ..services.mentor_service import get_mentor_interns, submit_feedback, create_task, review_task, get_pending_reviews
 from ..services.ai_service import generate_talking_points, generate_feedback_draft
 
 router = APIRouter()
+
+
+def _get_real_mentor_id(request: Request) -> str:
+    db = SessionLocal()
+    try:
+        mentor = db.query(Mentor).filter(Mentor.user_id == request.state.user_id).first()
+        if not mentor:
+            raise HTTPException(403, "当前用户不是导师")
+        return mentor.id
+    finally:
+        db.close()
 
 
 @router.get("/{mentor_id}/interns")
@@ -56,8 +69,8 @@ class FeedbackRequest(BaseModel):
 
 
 @router.post("/feedback/{intern_id}")
-def create_feedback(intern_id: str, req: FeedbackRequest):
-    return submit_feedback(intern_id, "default", req.model_dump())
+def create_feedback(intern_id: str, req_body: FeedbackRequest, request: Request):
+    return submit_feedback(intern_id, _get_real_mentor_id(request), req_body.model_dump())
 
 
 class CreateTaskRequest(BaseModel):
@@ -70,9 +83,9 @@ class CreateTaskRequest(BaseModel):
 
 
 @router.post("/tasks")
-def create_task_endpoint(req: CreateTaskRequest):
+def create_task_endpoint(req: CreateTaskRequest, request: Request):
     from ..services.mentor_service import create_task
-    return create_task("default", req.model_dump())
+    return create_task(_get_real_mentor_id(request), req.model_dump())
 
 
 class ReviewTaskRequest(BaseModel):
@@ -120,22 +133,22 @@ def list_templates(mentor_id: str):
     return list_templates(mentor_id)
 
 @router.post("/task-templates")
-def create_template(req: CreateTemplateRequest, mentor_id: str = "default"):
+def create_template(req: CreateTemplateRequest, request: Request):
     from ..services.mentor_service import create_template
-    return create_template(mentor_id, req.model_dump())
+    return create_template(_get_real_mentor_id(request), req.model_dump())
 
 @router.post("/task-templates/{template_id}/apply")
-def apply_template(template_id: str, req: ApplyTemplateRequest, mentor_id: str = "default"):
+def apply_template(template_id: str, req: ApplyTemplateRequest, request: Request):
     from ..services.mentor_service import apply_template
-    result = apply_template(mentor_id, template_id, req.model_dump())
+    result = apply_template(_get_real_mentor_id(request), template_id, req.model_dump())
     if result.get("error"):
         raise HTTPException(404, result["error"])
     return result
 
 @router.delete("/task-templates/{template_id}")
-def delete_template(template_id: str, mentor_id: str = "default"):
+def delete_template(template_id: str, request: Request):
     from ..services.mentor_service import delete_template
-    result = delete_template(mentor_id, template_id)
+    result = delete_template(_get_real_mentor_id(request), template_id)
     if result.get("error"):
         raise HTTPException(404, result["error"])
     return result
@@ -155,13 +168,13 @@ class DeadlineRequest(BaseModel):
 
 
 @router.post("/deadline")
-def set_deadline_endpoint(req: DeadlineRequest, mentor_id: str = "default"):
+def set_deadline_endpoint(req: DeadlineRequest, request: Request):
     from ..services.mentor_service import set_deadline
     if not (0 <= req.day_of_week <= 6):
         raise HTTPException(400, "day_of_week must be 0-6")
     if not (0 <= req.hour <= 23):
         raise HTTPException(400, "hour must be 0-23")
-    return set_deadline(mentor_id, req.day_of_week, req.hour)
+    return set_deadline(_get_real_mentor_id(request), req.day_of_week, req.hour)
 
 
 @router.get("/{mentor_id}/deadline")
@@ -177,7 +190,7 @@ class BaselineRequest(BaseModel):
 
 
 @router.post("/interns/{intern_id}/baseline")
-def submit_baseline_endpoint(intern_id: str, req: BaselineRequest, mentor_id: str = "default"):
+def submit_baseline_endpoint(intern_id: str, req: BaselineRequest, request: Request):
     from ..services.mentor_service import submit_baseline
     expected_dims = ["业务理解", "需求分析", "协作沟通", "交付质量"]
     for dim in expected_dims:
@@ -185,7 +198,7 @@ def submit_baseline_endpoint(intern_id: str, req: BaselineRequest, mentor_id: st
             raise HTTPException(400, f"Missing dimension: {dim}")
         if not (1 <= req.scores[dim] <= 5):
             raise HTTPException(400, f"{dim} score must be 1-5")
-    result = submit_baseline(mentor_id, intern_id, req.scores)
+    result = submit_baseline(_get_real_mentor_id(request), intern_id, req.scores)
     if result.get("error"):
         raise HTTPException(404, result["error"])
     return result

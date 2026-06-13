@@ -7,7 +7,7 @@ import type { TaskTemplate } from '../../types'
 export default function TaskTemplates() {
   const [templates, setTemplates] = useState<TaskTemplate[]>([])
   const [loading, setLoading] = useState(true)
-  const mentorId = JSON.parse(localStorage.getItem('user') || '{}').id
+  const mentorId = JSON.parse(sessionStorage.getItem('user') || '{}').id
 
   useEffect(() => {
     mentors.getTemplates(mentorId).then(r => setTemplates(r.templates)).catch(() => {}).finally(() => setLoading(false))
