@@ -139,6 +139,12 @@ class TaskReportRequest(BaseModel):
     report_md: str
 
 
+@router.get("/{intern_id}/growth-timeline")
+def growth_timeline(intern_id: str):
+    from ..services.intern_service import get_growth_timeline
+    return get_growth_timeline(intern_id)
+
+
 @router.post("/{intern_id}/tasks/{task_id}/report")
 def submit_task_report(intern_id: str, task_id: str, req: TaskReportRequest):
     from ..services.intern_service import submit_task_report

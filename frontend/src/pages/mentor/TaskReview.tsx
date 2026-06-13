@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Card, Button, Input, message, Spin, Alert, Space } from 'antd'
-import { mentors } from '../../services/api'
+import { mentors, ai } from '../../services/api'
 import type { Annotation } from '../../types'
 import ReviewAnnotations from '../../components/ReviewAnnotations'
 
@@ -14,6 +14,7 @@ export default function TaskReview() {
   const [annotations, setAnnotations] = useState<Annotation[]>([])
   const [rejectionReason, setRejectionReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [aiDraft, setAiDraft] = useState<{ highlights: string[]; suggestions: string[]; suggested_score: number } | null>(null)
 
   useEffect(() => {
     const mentorId = JSON.parse(localStorage.getItem('user') || '{}').id
@@ -21,6 +22,12 @@ export default function TaskReview() {
       const t = r.tasks.find((t: any) => t.id === taskId)
       setTask(t || null)
     }).catch(() => {}).finally(() => setLoading(false))
+  }, [taskId])
+
+  useEffect(() => {
+    if (taskId) {
+      ai.getReviewDraft(taskId!).then(r => setAiDraft(r.draft)).catch(() => {})
+    }
   }, [taskId])
 
   const handleAction = async (approval: 'approved' | 'rejected') => {
@@ -62,6 +69,17 @@ export default function TaskReview() {
           )}
         </div>
       </Card>
+
+      {aiDraft && (
+        <Card className="glass-card" style={{ marginBottom: 16, border: '1px solid #f59e0b' }}>
+          <h3 style={{ fontSize: '1rem', marginBottom: 8, color: '#f59e0b' }}>AI 审阅建议</h3>
+          <p><strong>推荐评分：</strong>{aiDraft.suggested_score}/5</p>
+          <p><strong>亮点：</strong></p>
+          <ul>{aiDraft.highlights.map((h, i) => <li key={i}>{h}</li>)}</ul>
+          <p><strong>建议：</strong></p>
+          <ul>{aiDraft.suggestions.map((s, i) => <li key={i}>{s}</li>)}</ul>
+        </Card>
+      )}
 
       <Card className="glass-card" style={{ marginBottom: 16 }}>
         <h3 style={{ fontSize: '1rem', marginBottom: 12 }}>评分</h3>

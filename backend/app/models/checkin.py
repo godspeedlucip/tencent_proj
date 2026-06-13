@@ -24,6 +24,9 @@ class CheckIn(Base):
     blockers: Mapped[str | None] = mapped_column(Text, nullable=True)
     emotion_capsule: Mapped[EmotionCapsule] = mapped_column(SAEnum(EmotionCapsule), nullable=False)
     mapped_stress_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    weekly_report_md: Mapped[str | None] = mapped_column(Text, nullable=True)
+    mentor_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    mentor_comment: Mapped[str | None] = mapped_column(Text, nullable=True)
     next_plan: Mapped[str | None] = mapped_column(Text, nullable=True)
     submitted_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 

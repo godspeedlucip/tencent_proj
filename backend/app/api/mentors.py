@@ -91,6 +91,56 @@ def review_task(task_id: str, req: ReviewTaskRequest):
     return result
 
 
+class ScoreCheckinRequest(BaseModel):
+    score: int
+    comment: str | None = None
+
+@router.post("/checkins/{checkin_id}/score")
+def score_checkin(checkin_id: str, req: ScoreCheckinRequest):
+    from ..services.mentor_service import score_checkin
+    result = score_checkin(checkin_id, req.model_dump())
+    if result.get("error"):
+        raise HTTPException(404, result["error"])
+    return result
+
+
+class CreateTemplateRequest(BaseModel):
+    title: str
+    description: str | None = None
+    type: str
+    priority: str = "medium"
+
+class ApplyTemplateRequest(BaseModel):
+    intern_id: str
+    due_date: str | None = None
+
+@router.get("/task-templates")
+def list_templates(mentor_id: str):
+    from ..services.mentor_service import list_templates
+    return list_templates(mentor_id)
+
+@router.post("/task-templates")
+def create_template(req: CreateTemplateRequest, mentor_id: str = "default"):
+    from ..services.mentor_service import create_template
+    return create_template(mentor_id, req.model_dump())
+
+@router.post("/task-templates/{template_id}/apply")
+def apply_template(template_id: str, req: ApplyTemplateRequest, mentor_id: str = "default"):
+    from ..services.mentor_service import apply_template
+    result = apply_template(mentor_id, template_id, req.model_dump())
+    if result.get("error"):
+        raise HTTPException(404, result["error"])
+    return result
+
+@router.delete("/task-templates/{template_id}")
+def delete_template(template_id: str, mentor_id: str = "default"):
+    from ..services.mentor_service import delete_template
+    result = delete_template(mentor_id, template_id)
+    if result.get("error"):
+        raise HTTPException(404, result["error"])
+    return result
+
+
 @router.get("/pending-reviews")
 def pending_reviews(mentor_id: str):
     from ..services.mentor_service import get_pending_reviews

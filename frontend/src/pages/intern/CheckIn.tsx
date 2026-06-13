@@ -38,6 +38,9 @@ export default function CheckIn({ internId, currentWeek, onClose }: Props) {
         <Form.Item label="下周计划" name="next_plan">
           <Input.TextArea rows={2} placeholder="下周你计划做什么？" />
         </Form.Item>
+        <Form.Item name="weekly_report_md" label="本周周报 (Markdown)">
+          <Input.TextArea rows={10} placeholder="## 本周产出\n\n## 能力提升\n\n## 不足与反思\n\n## 下周计划" />
+        </Form.Item>
         <Button type="primary" htmlType="submit" loading={submitting} block>提交 Check-in</Button>
       </Form>
     </Modal>

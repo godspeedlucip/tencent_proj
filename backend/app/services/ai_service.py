@@ -513,3 +513,33 @@ def generate_fit_report(intern_name: str, context: dict | None = None) -> dict:
             data[key] = FALLBACK_FIT_REPORT.get(key, "observe" if key == "ai_recommendation" else [])
 
     return {"data": data, "source": source, "generated_at": _now_iso()}
+
+
+def generate_review_draft(content: str, content_type: str = "task_report", context: dict | None = None) -> dict:
+    client = _get_client()
+    model = _get_model(for_report=False)
+    system_lines = [
+        "你是一位经验丰富的产品导师，正在审阅实习生的报告。",
+        "请以JSON格式返回审阅草稿，包含以下字段：",
+        '- highlights: 1-2条亮点（做得好的地方）',
+        '- suggestions: 1-2条改进建议',
+        '- suggested_score: 1-5的推荐评分',
+        "只返回JSON，不要包含markdown代码块标记。",
+    ]
+    if context:
+        if context.get("intern_name"):
+            system_lines.insert(1, f"实习生：{context['intern_name']}")
+        if context.get("task_title"):
+            system_lines.insert(2, f"任务：{context['task_title']}")
+        if context.get("week"):
+            system_lines.insert(2, f"第{context['week']}周")
+    system_prompt = "\n".join(system_lines)
+    msg = f"请审阅以下{'周报' if content_type == 'weekly_report' else '任务报告'}：\n\n{content}"
+    messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": msg}]
+    fallback = {"highlights": ["报告结构清晰"], "suggestions": ["可以补充更多数据支撑"], "suggested_score": 3}
+    result, source = _ai_or_fallback(client, messages, max_tokens=250, model=model, fallback_data=fallback)
+    if source == "fallback":
+        draft = result if isinstance(result, dict) else fallback
+    else:
+        draft = result if isinstance(result, dict) else {"raw": result}
+    return {"draft": draft, "source": source, "generated_at": _now_iso()}

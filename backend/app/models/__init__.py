@@ -13,6 +13,7 @@ from .user import User
 from .intern import Intern
 from .mentor import Mentor
 from .task import Task
+from .task_template import TaskTemplate
 from .checkin import CheckIn
 from .mentor_feedback import MentorFeedback
 from .risk_signal import RiskSignal

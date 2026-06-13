@@ -4,6 +4,7 @@ from ..models.intern import Intern
 from ..models.task import Task, TaskStatus
 from ..models.checkin import CheckIn
 from ..models.mentor_feedback import MentorFeedback
+from ..models.task_template import TaskTemplate
 
 
 def get_mentor_interns(mentor_id: str) -> list[dict]:
@@ -105,6 +106,20 @@ def review_task(task_id: str, data: dict) -> dict:
         db.close()
 
 
+def score_checkin(checkin_id: str, data: dict) -> dict:
+    db = SessionLocal()
+    try:
+        checkin = db.query(CheckIn).filter(CheckIn.id == checkin_id).first()
+        if not checkin:
+            return {"error": "CheckIn not found"}
+        checkin.mentor_score = data["score"]
+        checkin.mentor_comment = data.get("comment")
+        db.commit()
+        return {"id": checkin.id, "score": checkin.mentor_score}
+    finally:
+        db.close()
+
+
 def get_pending_reviews(mentor_id: str) -> dict:
     db = SessionLocal()
     try:
@@ -125,5 +140,59 @@ def get_pending_reviews(mentor_id: str) -> dict:
                 for t in tasks
             ]
         }
+    finally:
+        db.close()
+
+
+def list_templates(mentor_id: str) -> dict:
+    db = SessionLocal()
+    try:
+        templates = db.query(TaskTemplate).filter(TaskTemplate.mentor_id == mentor_id).all()
+        return {"templates": [
+            {"id": t.id, "title": t.title, "description": t.description, "type": t.type.value, "priority": t.priority.value, "created_at": t.created_at.isoformat()}
+            for t in templates
+        ]}
+    finally:
+        db.close()
+
+
+def create_template(mentor_id: str, data: dict) -> dict:
+    db = SessionLocal()
+    try:
+        tmpl = TaskTemplate(mentor_id=mentor_id, title=data["title"], description=data.get("description"),
+                           type=TaskType(data["type"]), priority=TaskPriority(data.get("priority", "medium")))
+        db.add(tmpl)
+        db.commit()
+        return {"id": tmpl.id, "title": tmpl.title}
+    finally:
+        db.close()
+
+
+def apply_template(mentor_id: str, template_id: str, data: dict) -> dict:
+    db = SessionLocal()
+    try:
+        tmpl = db.query(TaskTemplate).filter(TaskTemplate.id == template_id, TaskTemplate.mentor_id == mentor_id).first()
+        if not tmpl:
+            return {"error": "Template not found"}
+        due_date = date.fromisoformat(data["due_date"]) if data.get("due_date") else None
+        task = Task(intern_id=data["intern_id"], title=tmpl.title, description=tmpl.description,
+                    type=tmpl.type, priority=tmpl.priority, due_date=due_date, creator_id=mentor_id,
+                    approval_status=ApprovalStatus.pending)
+        db.add(task)
+        db.commit()
+        return {"id": task.id, "title": task.title}
+    finally:
+        db.close()
+
+
+def delete_template(mentor_id: str, template_id: str) -> dict:
+    db = SessionLocal()
+    try:
+        tmpl = db.query(TaskTemplate).filter(TaskTemplate.id == template_id, TaskTemplate.mentor_id == mentor_id).first()
+        if not tmpl:
+            return {"error": "Template not found"}
+        db.delete(tmpl)
+        db.commit()
+        return {"id": template_id, "deleted": True}
     finally:
         db.close()

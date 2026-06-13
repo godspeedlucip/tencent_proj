@@ -67,6 +67,7 @@ def submit_checkin(intern_id: str, data: dict) -> dict:
             blockers=data.get("blockers"),
             emotion_capsule=emotion,
             mapped_stress_score=stress,
+            weekly_report_md=data.get("weekly_report_md"),
             next_plan=data.get("next_plan"),
         )
         db.add(checkin)
@@ -144,6 +145,34 @@ def submit_checkin_with_ai(intern_id: str, data: dict) -> dict:
             "suggested_actions": analysis.get("data", {}).get("suggested_actions", []),
         }
         return result
+    finally:
+        db.close()
+
+
+def get_growth_timeline(intern_id: str) -> dict:
+    db = SessionLocal()
+    try:
+        checkins = db.query(CheckIn).filter(CheckIn.intern_id == intern_id).order_by(CheckIn.week.asc()).all()
+        tasks = db.query(Task).filter(Task.intern_id == intern_id, Task.score.isnot(None)).all()
+        scores_by_week: dict[int, list[int]] = {}
+        for t in tasks:
+            if t.report_submitted_at and t.score:
+                week = t.report_submitted_at.isocalendar()[1]
+                scores_by_week.setdefault(week, []).append(t.score)
+        points = []
+        for c in checkins:
+            week_scores = scores_by_week.get(c.week)
+            points.append({
+                "week": c.week,
+                "task_scores_avg": round(sum(week_scores) / len(week_scores), 1) if week_scores else None,
+                "checkin_score": c.mentor_score,
+                "radar_data": c.intern.current_scores or {},
+            })
+        milestones = [
+            {"week": c.week, "event": f"第{c.week}周完成Check-in"}
+            for c in checkins if c.mentor_score and c.mentor_score >= 4
+        ]
+        return {"scores_over_time": points, "milestones": milestones}
     finally:
         db.close()
 

@@ -59,6 +59,7 @@ export const interns = {
     request<{ id: string; status: string }>(`/interns/${id}/baseline`, { method: 'POST', body: JSON.stringify({ scores }) }),
   submitTaskReport: (internId: string, taskId: string, reportMd: string) =>
     request<{ id: string; status: string }>(`/interns/${internId}/tasks/${taskId}/report`, { method: 'POST', body: JSON.stringify({ report_md: reportMd }) }),
+  getGrowthTimeline: (id: string) => request<import('../types').GrowthTimeline>(`/interns/${id}/growth-timeline`),
 }
 
 // Mentors
@@ -74,6 +75,10 @@ export const mentors = {
     request<{ tasks: Array<{ id: string; title: string; intern_id: string; intern_name: string; report_md: string | null; report_submitted_at: string | null }> }>(`/mentor/pending-reviews?mentor_id=${mentorId}`),
   reviewTask: (taskId: string, data: { approval: string; score?: number; annotations?: { line: number; text: string }[]; rejection_reason?: string }) =>
     request<{ id: string; approval_status: string }>(`/mentor/tasks/${taskId}/review`, { method: 'POST', body: JSON.stringify(data) }),
+  scoreCheckin: (checkinId: string, data: { score: number; comment?: string }) =>
+    request<{ id: string; score: number }>(`/mentor/checkins/${checkinId}/score`, { method: 'POST', body: JSON.stringify(data) }),
+  getTemplates: (mentorId: string) => request<{ templates: import('../types').TaskTemplate[] }>(`/mentor/task-templates?mentor_id=${mentorId}`),
+  deleteTemplate: (mentorId: string, templateId: string) => request<{ deleted: boolean }>(`/mentor/task-templates/${templateId}?mentor_id=${mentorId}`, { method: 'DELETE' }),
 }
 
 // Recruiters
@@ -111,4 +116,6 @@ export const notifications = {
 // AI
 export const ai = {
   getDailyTip: (internId: string) => request<AIDailyTip>(`/ai/daily-tip/${internId}`),
+  getReviewDraft: (taskId: string) =>
+    request<{ draft: { highlights: string[]; suggestions: string[]; suggested_score: number }; source: string }>(`/ai/review-draft/${taskId}`, { method: 'POST' }),
 }
