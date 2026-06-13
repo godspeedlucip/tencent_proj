@@ -72,7 +72,10 @@ export default function InternDashboard({ user }: Props) {
 
   return (
     <div>
-      {intern.baseline_scores === null && <Baseline internId={user.id} onComplete={loadData} />}
+      <Baseline
+              baselineScores={intern.baseline_scores}
+              currentScores={intern.current_scores}
+            />
       {showCheckin && <CheckIn internId={user.id} currentWeek={intern.onboard_week} onClose={() => { setShowCheckin(false); loadData() }} />}
 
       <Tabs items={[

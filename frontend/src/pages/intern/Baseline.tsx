@@ -1,46 +1,70 @@
-import { useState } from 'react'
-import { Slider, message, Space } from 'antd'
-import { interns } from '../../services/api'
+import RadarChart from '../../components/RadarChart'
 
 const DIMS = ['业务理解', '需求分析', '协作沟通', '交付质量']
 
-export default function Baseline({ internId, onComplete }: { internId: string; onComplete: () => void }) {
-  const [scores, setScores] = useState<Record<string, number>>({ 业务理解: 2, 需求分析: 2, 协作沟通: 3, 交付质量: 2 })
-  const [submitting, setSubmitting] = useState(false)
+interface Props {
+  baselineScores: Record<string, number> | null
+  currentScores: Record<string, number> | null
+}
 
-  async function submit() {
-    setSubmitting(true)
-    try {
-      await interns.submitBaseline(internId, scores)
-      message.success('基线评估已提交，等待导师复核')
-      onComplete()
-    } catch {
-      message.error('提交失败')
-    } finally {
-      setSubmitting(false)
-    }
+export default function Baseline({ baselineScores, currentScores }: Props) {
+  if (!baselineScores) {
+    return (
+      <div className="glass-card" style={{ padding: 24, marginBottom: 16, textAlign: 'center' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 8px' }}>
+          入职成长基线评估
+        </h3>
+        <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+          等待导师评估中，完成评估后将在此展示你的成长起点和当前水平。
+        </p>
+      </div>
+    )
   }
 
   return (
-    <div className="glass-card" style={{ padding: 24, marginBottom: 16, borderColor: 'rgba(59,130,246,0.3)', background: 'rgba(239,246,255,0.7)' }}>
-      <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 8px' }}>入职成长基线评估</h3>
-      <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: 16 }}>
-        欢迎加入！请诚实地评估自己在以下四个维度的当前水平（1=完全不了解，5=能独立完成）。导师会对你的自评进行复核，这是你成长路径的起点。
-      </p>
-      <Space direction="vertical" style={{ width: '100%' }}>
-        {DIMS.map(dim => (
-          <div key={dim}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <strong style={{ color: '#334155' }}>{dim}</strong>
-              <span style={{ color: '#f59e0b', fontWeight: 600 }}>{scores[dim]} 分</span>
+    <div className="glass-card" style={{ padding: 24, marginBottom: 16 }}>
+      <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 12px' }}>
+        入职成长基线评估
+      </h3>
+      <RadarChart scores={Object.fromEntries(DIMS.map(dim => [
+        dim,
+        {
+          baseline: baselineScores[dim] ?? 0,
+          current: currentScores?.[dim] ?? baselineScores[dim] ?? 0,
+          trend: currentScores && baselineScores
+            ? currentScores[dim] > baselineScores[dim] ? 'up'
+            : currentScores[dim] < baselineScores[dim] ? 'down'
+            : 'stable'
+            : 'stable',
+        }
+      ]))} />
+      <div style={{ marginTop: 16 }}>
+        {DIMS.map(dim => {
+          const baseline = baselineScores[dim] ?? 0
+          const current = currentScores?.[dim] ?? baseline
+          return (
+            <div key={dim} style={{ marginBottom: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: '0.85rem', color: '#475569' }}>{dim}</span>
+                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                  基线 {baseline} → 当前 {current}
+                </span>
+              </div>
+              <div className="progress-track">
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${Math.round(current / 5 * 100)}%`,
+                    background: current >= 4
+                      ? 'linear-gradient(90deg, #10b981, #34d399)'
+                      : 'linear-gradient(90deg, #f59e0b, #fbbf24)',
+                  }}
+                />
+              </div>
             </div>
-            <Slider min={1} max={5} value={scores[dim]} onChange={v => setScores(s => ({ ...s, [dim]: v }))} />
-          </div>
-        ))}
-      </Space>
-      <button className="btn-primary" onClick={submit} disabled={submitting} style={{ marginTop: 16 }}>
-        {submitting ? '提交中...' : '提交基线评估'}
-      </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
