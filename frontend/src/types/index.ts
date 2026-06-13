@@ -272,3 +272,25 @@ export interface HRIntern {
   onboard_week: number
   status: string
 }
+
+export interface Credentials {
+  username: string
+  password: string
+}
+
+export interface HRCreateInternResponse extends HRIntern {
+  credentials: Credentials
+}
+
+export interface HRCreateMentorResponse {
+  id: string
+  name: string
+  department: string
+  credentials: Credentials
+}
+
+export interface HRInternDetail {
+  intern: HRIntern
+  tasks: MentorInternTask[]
+  checkins: MentorInternCheckin[]
+}
