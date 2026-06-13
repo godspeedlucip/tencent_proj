@@ -56,7 +56,7 @@ export default function Analytics() {
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie data={data.emotion_distribution} dataKey="count" nameKey="emotion" cx="50%" cy="50%" outerRadius={100}
-                  label={({ emotion, count }) => `${EMOTION_LABELS[emotion] || emotion}: ${count}`}>
+                  label={(entry: any) => `${EMOTION_LABELS[entry.emotion] || entry.emotion}: ${entry.count}`}>
                   {data.emotion_distribution.map(e => (
                     <Cell key={e.emotion} fill={EMOTION_COLORS[e.emotion] || '#ddd'} />
                   ))}
@@ -93,7 +93,7 @@ export default function Analytics() {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                 <XAxis type="number" domain={[0, 100]} />
                 <YAxis type="category" dataKey="mentor_name" width={60} />
-                <Tooltip formatter={(v: number) => `${v}%`} />
+                <Tooltip formatter={(v: any) => `${v}%`} />
                 <Bar dataKey="coverage_pct" fill="#1890ff" name="反馈覆盖率" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>

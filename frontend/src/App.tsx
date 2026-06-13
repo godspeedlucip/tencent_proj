@@ -1,18 +1,16 @@
-import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
-import { ConfigProvider, Spin, message } from 'antd'
-import type { Role } from './types'
-import { auth, setRole as setApiRole } from './services/api'
+import { ConfigProvider } from 'antd'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { RoleProvider, useRole } from './contexts/RoleContext'
-import RoleSwitcher from './components/RoleSwitcher'
-import PrivacyModal from './components/PrivacyModal'
-import NotificationBell from './components/NotificationBell'
+import AuthGuard from './components/AuthGuard'
+import LoginPage from './pages/Login'
 import InternDashboard from './pages/intern/Dashboard'
 import MentorDashboard from './pages/mentor/Dashboard'
 import HRRiskBoard from './pages/hr/RiskBoard'
 import HRAnalytics from './pages/hr/Analytics'
 import RecruiterFitReportList from './pages/recruiter/FitReportList'
-import RecruiterFitReportDetail from './pages/recruiter/FitReportDetail'
+import TaskReport from './pages/intern/TaskReport'
+import TaskReview from './pages/mentor/TaskReview'
+import AssignTask from './pages/mentor/AssignTask'
 
 const antTheme = {
   token: {
@@ -23,43 +21,19 @@ const antTheme = {
 }
 
 function AppShell() {
-  const { role, user, setRole } = useRole()
-  const [loading, setLoading] = useState(true)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    handleRoleSwitch('intern')
-  }, [])
-
-  async function handleRoleSwitch(newRole: Role) {
-    setLoading(true)
-    try {
-      const res = await auth.switchRole(newRole)
-      setRole(newRole, res.user)
-      setApiRole(newRole, res.user.id)
-      navigate(newRole === 'intern' ? '/intern' : `/${newRole}`)
-    } catch {
-      message.warning('后端未连接，使用本地模式')
-      setRole(newRole, { id: 'local', name: '本地用户', department: 'Demo' })
-      setApiRole(newRole)
-      navigate(newRole === 'intern' ? '/intern' : `/${newRole}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) return <Spin size="large" style={{ display: 'block', margin: '200px auto' }} />
+  const { role, user, logout } = useRole()
 
   return (
     <ConfigProvider theme={antTheme}>
-      <PrivacyModal />
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <nav className="glass-nav" style={{ padding: '12px 24px' }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span className="gradient-text" style={{ fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer' }} onClick={() => navigate('/intern')}>实习能量站</span>
+            <span className="gradient-text" style={{ fontSize: '1.1rem', fontWeight: 800 }}>实习能量站</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <NotificationBell role={role} userId={user?.id ?? ''} />
-              <RoleSwitcher currentRole={role} onSwitch={handleRoleSwitch} />
+              <span style={{ color: '#475569', fontSize: '0.85rem' }}>{user?.name} · {role}</span>
+              <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '4px 12px' }} onClick={logout}>
+                退出
+              </button>
             </div>
           </div>
         </nav>
@@ -68,11 +42,13 @@ function AppShell() {
             <Routes>
               <Route path="/" element={<Navigate to="/intern" replace />} />
               <Route path="/intern" element={<InternDashboard user={user!} />} />
+              <Route path="/intern/tasks/:taskId/report" element={<TaskReport />} />
               <Route path="/mentor" element={<MentorDashboard user={user!} />} />
+              <Route path="/mentor/review/:taskId" element={<TaskReview />} />
+              <Route path="/mentor/assign" element={<AssignTask />} />
               <Route path="/hr" element={<HRRiskBoard />} />
               <Route path="/hr/analytics" element={<HRAnalytics />} />
               <Route path="/recruiter" element={<RecruiterFitReportList />} />
-              <Route path="/recruiter/:id" element={<RecruiterFitReportDetail />} />
             </Routes>
           </div>
         </main>
@@ -85,7 +61,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <RoleProvider>
-        <AppShell />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route element={<AuthGuard />}>
+            <Route path="/*" element={<AppShell />} />
+          </Route>
+        </Routes>
       </RoleProvider>
     </BrowserRouter>
   )

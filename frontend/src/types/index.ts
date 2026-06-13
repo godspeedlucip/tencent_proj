@@ -154,3 +154,70 @@ export interface MentorPerformance {
 export interface ApiError {
   error: { code: string; message: string }
 }
+
+export interface UserInfo {
+  id: string
+  username: string
+  role: Role
+  profile: {
+    id: string
+    name: string
+    department: string
+  }
+}
+
+export interface LoginResponse {
+  token: string
+  user: UserInfo
+}
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
+
+export interface Annotation {
+  line: number
+  text: string
+}
+
+export interface TaskDetail extends Task {
+  description: string | null
+  creator_id: string
+  report_md: string | null
+  report_submitted_at: string | null
+  score: number | null
+  annotation_json: Annotation[] | null
+  approval_status: ApprovalStatus
+  rejection_reason: string | null
+}
+
+export interface CheckInDetail extends CheckIn {
+  weekly_report_md: string | null
+  mentor_score: number | null
+  mentor_comment: string | null
+}
+
+export interface TaskTemplate {
+  id: string
+  mentor_id: string
+  title: string
+  description: string
+  type: TaskType
+  priority: TaskPriority
+  created_at: string
+}
+
+export interface GrowthTimelinePoint {
+  week: number
+  task_scores_avg: number | null
+  checkin_score: number | null
+  radar_data: Record<string, number>
+}
+
+export interface GrowthMilestone {
+  week: number
+  event: string
+}
+
+export interface GrowthTimeline {
+  scores_over_time: GrowthTimelinePoint[]
+  milestones: GrowthMilestone[]
+}

@@ -2,37 +2,43 @@ import type { Intern, CheckIn, Task, MentorFeedback, TalkingPoints, AIDailyTip, 
 
 const BASE = '/api/v1'
 
-let currentRole: string = 'intern'
-let currentUserId: string = ''
-
-export function setRole(role: string, userId?: string) {
-  currentRole = role
-  if (userId) currentUserId = userId
+function getToken(): string | null {
+  return localStorage.getItem('token')
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getToken()
   const res = await fetch(`${BASE}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      'X-Role': currentRole,
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       ...options?.headers,
     },
   })
   if (!res.ok) {
+    if (res.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('role')
+      localStorage.removeItem('user')
+      window.location.href = '/login'
+      throw new Error('Session expired')
+    }
     const body = await res.json().catch(() => ({}))
-    throw new Error(body?.error?.message || `HTTP ${res.status}`)
+    throw new Error(body?.detail || `HTTP ${res.status}`)
   }
   return res.json()
 }
 
 // Auth
 export const auth = {
-  switchRole: (role: string, userId?: string) =>
-    request<{ role: string; user: { id: string; name: string; department: string }; permissions: string[] }>(
-      '/auth/switch-role',
-      { method: 'POST', body: JSON.stringify({ role, user_id: userId }) },
-    ),
+  login: (username: string, password: string) =>
+    request<import('../types').LoginResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    }),
+  me: () =>
+    request<import('../types').UserInfo>('/auth/me'),
 }
 
 // Interns
@@ -51,6 +57,8 @@ export const interns = {
     request<{ id: string }>(`/interns/${id}/checkins`, { method: 'POST', body: JSON.stringify(data) }),
   submitBaseline: (id: string, scores: Record<string, number>) =>
     request<{ id: string; status: string }>(`/interns/${id}/baseline`, { method: 'POST', body: JSON.stringify({ scores }) }),
+  submitTaskReport: (internId: string, taskId: string, reportMd: string) =>
+    request<{ id: string; status: string }>(`/interns/${internId}/tasks/${taskId}/report`, { method: 'POST', body: JSON.stringify({ report_md: reportMd }) }),
 }
 
 // Mentors
@@ -60,6 +68,12 @@ export const mentors = {
   submitFeedback: (internId: string, data: { checkin_id?: string; final_feedback: string; rating: string; ai_suggestion_vote: string }) =>
     request<{ id: string }>(`/mentor/feedback/${internId}`, { method: 'POST', body: JSON.stringify(data) }),
   getFeedbackDraft: (internId: string) => request<{ intern_id: string; ai_draft: string; generated_at: string; source: string }>(`/mentor/feedback-draft/${internId}`),
+  createTask: (data: { intern_id: string; title: string; description?: string; type: string; priority?: string; due_date?: string }) =>
+    request<{ id: string; title: string; status: string }>('/mentor/tasks', { method: 'POST', body: JSON.stringify(data) }),
+  getPendingReviews: (mentorId: string) =>
+    request<{ tasks: Array<{ id: string; title: string; intern_id: string; intern_name: string; report_md: string | null; report_submitted_at: string | null }> }>(`/mentor/pending-reviews?mentor_id=${mentorId}`),
+  reviewTask: (taskId: string, data: { approval: string; score?: number; annotations?: { line: number; text: string }[]; rejection_reason?: string }) =>
+    request<{ id: string; approval_status: string }>(`/mentor/tasks/${taskId}/review`, { method: 'POST', body: JSON.stringify(data) }),
 }
 
 // Recruiters

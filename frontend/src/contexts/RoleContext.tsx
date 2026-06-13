@@ -1,29 +1,52 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
-import type { Role } from '../types'
+import type { Role, UserInfo } from '../types'
 
 interface RoleContextType {
-  role: Role
+  role: Role | null
   user: { id: string; name: string; department: string } | null
-  setRole: (role: Role, user?: { id: string; name: string; department: string }) => void
+  token: string | null
+  isAuthenticated: boolean
+  login: (token: string, user: UserInfo) => void
+  logout: () => void
 }
 
 const RoleContext = createContext<RoleContextType>({
-  role: 'intern',
+  role: null,
   user: null,
-  setRole: () => {},
+  token: null,
+  isAuthenticated: false,
+  login: () => {},
+  logout: () => {},
 })
 
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const [role, setRoleState] = useState<Role>('intern')
-  const [user, setUser] = useState<{ id: string; name: string; department: string } | null>(null)
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'))
+  const [role, setRole] = useState<Role | null>(() => (localStorage.getItem('role') as Role) || null)
+  const [user, setUser] = useState<{ id: string; name: string; department: string } | null>(() => {
+    const stored = localStorage.getItem('user')
+    return stored ? JSON.parse(stored) : null
+  })
 
-  const setRole = useCallback((newRole: Role, newUser?: { id: string; name: string; department: string }) => {
-    setRoleState(newRole)
-    if (newUser) setUser(newUser)
+  const login = useCallback((newToken: string, newUser: UserInfo) => {
+    localStorage.setItem('token', newToken)
+    localStorage.setItem('role', newUser.role)
+    localStorage.setItem('user', JSON.stringify(newUser.profile))
+    setToken(newToken)
+    setRole(newUser.role)
+    setUser(newUser.profile)
+  }, [])
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('role')
+    localStorage.removeItem('user')
+    setToken(null)
+    setRole(null)
+    setUser(null)
   }, [])
 
   return (
-    <RoleContext.Provider value={{ role, user, setRole }}>
+    <RoleContext.Provider value={{ role, user, token, isAuthenticated: !!token, login, logout }}>
       {children}
     </RoleContext.Provider>
   )
