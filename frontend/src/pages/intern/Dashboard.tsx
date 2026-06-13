@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Spin, Alert } from 'antd'
 import { TrophyOutlined, BulbOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import { interns, ai } from '../../services/api'
-import type { Intern, Task, AIDailyTip } from '../../types'
+import type { Intern, Task, AIDailyTip as AIDailyTipType } from '../../types'
 import CheckIn from './CheckIn'
 import Tasks from './Tasks'
 import Baseline from './Baseline'
@@ -13,7 +13,7 @@ interface Props { user: { id: string; name: string; department: string } }
 export default function InternDashboard({ user }: Props) {
   const [intern, setIntern] = useState<(Intern & { recent_checkins?: any[] }) | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
-  const [dailyTip, setDailyTip] = useState<AIDailyTip | null>(null)
+  const [dailyTip, setDailyTip] = useState<AIDailyTipType | null>(null)
   const [tipLoading, setTipLoading] = useState(false)
   const [tipError, setTipError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
