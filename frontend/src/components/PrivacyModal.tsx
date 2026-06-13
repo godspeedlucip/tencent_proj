@@ -4,10 +4,18 @@ import { useState } from 'react'
 const STORAGE_KEY = 'intern_energy_station_privacy_consent'
 
 export default function PrivacyModal() {
-  const [open, setOpen] = useState(() => !localStorage.getItem(STORAGE_KEY))
+  const [open, setOpen] = useState(() => {
+    try {
+      return !localStorage.getItem(STORAGE_KEY)
+    } catch {
+      return true // localStorage unavailable — show modal
+    }
+  })
 
   function handleAgree() {
-    localStorage.setItem(STORAGE_KEY, 'true')
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true')
+    } catch { /* storage full or unavailable — dismiss anyway */ }
     setOpen(false)
   }
 
