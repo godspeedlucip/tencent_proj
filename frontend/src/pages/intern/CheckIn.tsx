@@ -1,14 +1,37 @@
-import { useState } from 'react'
-import { Modal, Form, Input, Select, Button, message } from 'antd'
-import { interns } from '../../services/api'
+import { useState, useEffect } from 'react'
+import { Modal, Form, Input, Button, message, Alert } from 'antd'
+import { interns, mentors } from '../../services/api'
 import EmotionCapsule from '../../components/EmotionCapsule'
+import type { DeadlineConfig } from '../../types'
 
 interface Props { internId: string; currentWeek: number; onClose: () => void }
+
+const DAY_LABELS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 
 export default function CheckIn({ internId, currentWeek, onClose }: Props) {
   const [form] = Form.useForm()
   const [emotion, setEmotion] = useState<string>('steady')
   const [submitting, setSubmitting] = useState(false)
+  const [deadline, setDeadline] = useState<DeadlineConfig | null>(null)
+
+  useEffect(() => {
+    interns.get(internId).then(i => {
+      const mentorId = (i as any).mentor?.id
+      if (mentorId) {
+        mentors.getDeadline(mentorId).then(setDeadline).catch(() => {})
+      }
+    }).catch(() => {})
+  }, [internId])
+
+  const isLate = deadline ? (() => {
+    const now = new Date()
+    const currentDay = now.getDay()
+    const currentHour = now.getHours()
+    if (currentDay > deadline.day_of_week || (currentDay === deadline.day_of_week && currentHour >= deadline.hour)) {
+      return true
+    }
+    return false
+  })() : false
 
   async function handleSubmit(values: any) {
     setSubmitting(true)
@@ -25,6 +48,17 @@ export default function CheckIn({ internId, currentWeek, onClose }: Props) {
 
   return (
     <Modal title={`第 ${currentWeek} 周 Check-in`} open onCancel={onClose} footer={null} width={600}>
+      {deadline && (
+        <Alert
+          type={isLate ? 'warning' : 'info'}
+          message={isLate
+            ? `迟交 — 截止时间为每${DAY_LABELS[deadline.day_of_week]} ${deadline.hour}:00`
+            : `截止时间：每${DAY_LABELS[deadline.day_of_week]} ${deadline.hour}:00`
+          }
+          style={{ marginBottom: 16 }}
+          showIcon
+        />
+      )}
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item label="本周进展" name="progress" rules={[{ required: true, message: '请填写本周进展' }]}>
           <Input.TextArea rows={3} placeholder="这周完成了什么？学到了什么？" />
