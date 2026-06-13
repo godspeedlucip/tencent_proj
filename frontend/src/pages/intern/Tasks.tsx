@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import type { Task } from '../../types'
 
 const typeStyle: Record<string, { bg: string; border: string; color: string; label: string }> = {
@@ -15,6 +16,8 @@ const statusStyle: Record<string, { bg: string; border: string; color: string; l
 }
 
 export default function Tasks({ tasks }: { tasks: Task[] }) {
+  const navigate = useNavigate()
+
   if (tasks.length === 0) {
     return <p style={{ color: '#94a3b8', fontSize: '0.9rem', textAlign: 'center', padding: 24 }}>暂无任务</p>
   }
@@ -24,16 +27,26 @@ export default function Tasks({ tasks }: { tasks: Task[] }) {
       {tasks.map(t => {
         const ts = typeStyle[t.type] ?? typeStyle.learning
         const ss = statusStyle[t.status] ?? statusStyle.not_started
+        const showReportBtn = t.status !== 'completed'
         return (
           <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(253,230,138,0.15)' }}>
             <span style={{ fontSize: '0.9rem', color: '#334155' }}>{t.title}</span>
-            <span style={{ display: 'flex', gap: 8 }}>
+            <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <span className="capsule-tag" style={{ background: ts.bg, borderColor: ts.border, color: ts.color }}>
                 {ts.label}
               </span>
               <span className="capsule-tag" style={{ background: ss.bg, borderColor: ss.border, color: ss.color }}>
                 {ss.label}
               </span>
+              {showReportBtn && (
+                <button
+                  className="btn-link"
+                  onClick={() => navigate(`/intern/tasks/${t.id}/report`)}
+                  style={{ fontSize: '0.8rem' }}
+                >
+                  提交报告
+                </button>
+              )}
             </span>
           </div>
         )
