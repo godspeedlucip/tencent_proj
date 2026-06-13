@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Row, Col, Card, Progress, Statistic, Alert, Button, Tag, Spin } from 'antd'
+import { Spin, Alert } from 'antd'
 import { TrophyOutlined, BulbOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import { interns, ai } from '../../services/api'
 import type { Intern, Task, AIDailyTip } from '../../types'
@@ -31,7 +31,6 @@ export default function InternDashboard({ user }: Props) {
       setTasks(t)
       setDailyTip(tip)
     } catch {
-      // Backend unavailable — use empty state
       setIntern(null)
     } finally {
       setLoading(false)
@@ -45,57 +44,132 @@ export default function InternDashboard({ user }: Props) {
     ? Object.keys(intern.current_scores).filter(k => (intern.current_scores?.[k] ?? 0) - (intern.baseline_scores?.[k] ?? 0) >= 2).length
     : 0
 
+  const dimCount = Object.keys(intern.current_scores ?? {}).length
+  const avgScore = intern.current_scores
+    ? Math.round(Object.values(intern.current_scores).reduce((a, b) => a + b, 0) / dimCount * 10) / 10
+    : 0
+
   return (
     <div>
       {intern.baseline_scores === null && <Baseline internId={user.id} onComplete={loadData} />}
       {showCheckin && <CheckIn internId={user.id} currentWeek={intern.onboard_week} onClose={() => { setShowCheckin(false); loadData() }} />}
 
-      <Row gutter={16}>
-        <Col span={16}>
-          <Card title={`欢迎回来，${intern.name}`} extra={<Tag color="blue">第 {intern.onboard_week} 周</Tag>}>
-            <Row gutter={16}>
-              <Col span={8}><Statistic title="任务完成率" value={Math.round((intern.task_completion_rate ?? 0) * 100)} suffix="%" /></Col>
-              <Col span={8}><Statistic title="能力提升维度" value={scoreDiff} suffix={`/ ${Object.keys(intern.current_scores ?? {}).length}`} /></Col>
-              <Col span={8}><Statistic title="核心能力评分" value={intern.current_scores ? Math.round(Object.values(intern.current_scores).reduce((a, b) => a + b, 0) / 4 * 10) / 10 : '-'} suffix="/5" /></Col>
-            </Row>
-            <div style={{ marginTop: 16 }}>
-              <Button type="primary" icon={<CheckCircleOutlined />} onClick={() => setShowCheckin(true)}>填写本周 Check-in</Button>
-            </div>
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <BulbOutlined style={{ color: '#faad14', fontSize: 20 }} />
-              <strong>今日AI成长建议</strong>
-              <Tag>{dailyTip?.source === 'ai' ? 'AI' : '本地'}</Tag>
-            </div>
-            <p style={{ color: '#555' }}>{dailyTip?.tip || '加载中...'}</p>
-          </Card>
-        </Col>
-      </Row>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e293b', margin: '0 0 20px' }}>
+        欢迎回来，{intern.name}
+        <span className="capsule-tag" style={{ marginLeft: 12, background: 'rgba(59,130,246,0.1)', borderColor: 'rgba(59,130,246,0.2)', color: '#1e40af', fontSize: '0.8rem', fontWeight: 500 }}>
+          第 {intern.onboard_week} 周
+        </span>
+      </h2>
 
-      <Row gutter={16} style={{ marginTop: 16 }}>
-        <Col span={12}>
-          <Card title={<><TrophyOutlined /> 我的成长</>}>
-            {intern.baseline_scores && intern.current_scores && Object.keys(intern.current_scores).map(k => (
-              <div key={k} style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>{k}</span>
-                  <span style={{ color: '#888' }}>基线 {intern.baseline_scores?.[k]} → 当前 {intern.current_scores?.[k]}</span>
+      {/* Stats Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 16 }}>
+        <div className="glass-card" style={{ padding: '20px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: 4 }}>任务完成率</div>
+          <div className="stat-value" style={{ color: '#f59e0b' }}>
+            {Math.round((intern.task_completion_rate ?? 0) * 100)}<span style={{ fontSize: '1rem' }}>%</span>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: 4 }}>本周统计</div>
+        </div>
+        <div className="glass-card" style={{ padding: '20px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: 4 }}>能力提升维度</div>
+          <div className="stat-value" style={{ color: '#3b82f6' }}>
+            {scoreDiff}<span style={{ fontSize: '1rem' }}>/{dimCount}</span>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: 4 }}>较基线提升 ≥2 档</div>
+        </div>
+        <div className="glass-card" style={{ padding: '20px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: 4 }}>核心能力评分</div>
+          <div className="stat-value" style={{ color: '#10b981' }}>
+            {avgScore || '-'}<span style={{ fontSize: '1rem' }}>/5</span>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: 4 }}>四维均值</div>
+        </div>
+        <div className="glass-card" style={{ padding: '20px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: 4 }}>本周任务</div>
+          <div className="stat-value" style={{ color: '#8b5cf6' }}>
+            {tasks.length}<span style={{ fontSize: '1rem' }}>个</span>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: 4 }}>
+            {tasks.filter(t => t.status === 'blocked').length > 0
+              ? `${tasks.filter(t => t.status === 'blocked').length} 个阻塞`
+              : '进行中'}
+          </div>
+        </div>
+      </div>
+
+      {/* Main + Sidebar */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, marginBottom: 16 }}>
+        {/* Main Card */}
+        <div className="glass-card" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: 0 }}>
+              <TrophyOutlined style={{ color: '#f59e0b', marginRight: 8 }} />
+              我的成长
+            </h3>
+          </div>
+          {intern.baseline_scores && intern.current_scores ? (
+            Object.keys(intern.current_scores).map(k => {
+              const current = intern.current_scores?.[k] ?? 0
+              const baseline = intern.baseline_scores?.[k] ?? 0
+              const pct = Math.round(current / 5 * 100)
+              return (
+                <div key={k} style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ fontSize: '0.9rem', color: '#475569' }}>{k}</span>
+                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                      基线 {baseline} → 当前 {current}
+                    </span>
+                  </div>
+                  <div className="progress-track">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${pct}%`,
+                        background: current >= 4
+                          ? 'linear-gradient(90deg, #10b981, #34d399)'
+                          : 'linear-gradient(90deg, #f59e0b, #fbbf24)',
+                      }}
+                    />
+                  </div>
                 </div>
-                <Progress percent={Math.round((intern.current_scores?.[k] ?? 0) / 5 * 100)} size="small" />
-              </div>
-            ))}
-            {(!intern.baseline_scores) && <p style={{ color: '#888' }}>完成首周基线评估后展示</p>}
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card title="本周任务">
-            <Tasks tasks={tasks} />
-          </Card>
-        </Col>
-      </Row>
+              )
+            })
+          ) : (
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>完成首周基线评估后展示</p>
+          )}
+          <div style={{ marginTop: 16 }}>
+            <button className="btn-primary" onClick={() => setShowCheckin(true)}>
+              <CheckCircleOutlined style={{ marginRight: 6 }} />
+              填写本周 Check-in
+            </button>
+          </div>
+        </div>
+
+        {/* AI Daily Tip */}
+        <div className="glass-card" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <BulbOutlined style={{ color: '#f59e0b', fontSize: 20 }} />
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: 0 }}>今日AI成长建议</h3>
+          </div>
+          <span className="capsule-tag" style={{
+            background: dailyTip?.source === 'ai' ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
+            borderColor: dailyTip?.source === 'ai' ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)',
+            color: dailyTip?.source === 'ai' ? '#065f46' : '#92400e',
+            marginBottom: 12,
+          }}>
+            {dailyTip?.source === 'ai' ? 'AI' : '本地'}
+          </span>
+          <p style={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.6 }}>
+            {dailyTip?.tip || '加载中...'}
+          </p>
+        </div>
+      </div>
+
+      {/* Tasks Card */}
+      <div className="glass-card" style={{ padding: 24 }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 12px' }}>本周任务</h3>
+        <Tasks tasks={tasks} />
+      </div>
     </div>
   )
 }
