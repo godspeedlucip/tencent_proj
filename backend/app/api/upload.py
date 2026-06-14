@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, Request, UploadFile, File
 
 router = APIRouter()
 
@@ -7,16 +7,32 @@ ALLOWED_TYPES = {
 }
 MAX_SIZE = 5 * 1024 * 1024  # 5MB
 
+MIME_TO_EXT = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/gif": "gif",
+    "image/webp": "webp",
+    "application/pdf": "pdf",
+}
+
 
 @router.post("")
-async def upload_file_endpoint(file: UploadFile = File(...)):
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(400, "不支持的文件类型，仅允许 JPG/PNG/GIF/WebP/PDF")
+async def upload_file_endpoint(request: Request, file: UploadFile = File(...)):
+    content_type = file.content_type
+    if content_type not in ALLOWED_TYPES:
+        raise HTTPException(400, f"Unsupported file type: {content_type}. Allowed: PNG, JPEG, GIF, WebP, PDF")
+
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > MAX_SIZE:
+        raise HTTPException(413, "File exceeds 5MB limit")
 
     content = await file.read()
     if len(content) > MAX_SIZE:
-        raise HTTPException(413, "文件超过 5MB 限制")
+        raise HTTPException(413, "File exceeds 5MB limit")
+
+    safe_filename = f"upload.{MIME_TO_EXT[content_type]}"
 
     from ..services.oss_service import upload_file
-    url, name = upload_file(content, file.filename or "file", file.content_type)
-    return {"url": url, "name": name}
+    url, _ = upload_file(content, safe_filename, content_type)
+    original_name = file.filename or "file"
+    return {"url": url, "name": original_name}
