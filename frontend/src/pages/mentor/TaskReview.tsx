@@ -70,6 +70,21 @@ export default function TaskReview() {
         </div>
       </Card>
 
+      {task.attachment_url && (
+        <Card className="glass-card" style={{ marginBottom: 16 }}>
+          <h3 style={{ fontSize: '1rem', marginBottom: 8 }}>附件</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: '#fafafa', borderRadius: 8, border: '1px solid #f0f0f0' }}>
+            <span style={{ fontSize: 20 }}>{/\.pdf$/i.test(task.attachment_url) ? '📄' : '🖼️'}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: 13 }}>{task.attachment_name || '附件'}</div>
+            </div>
+            <a href={task.attachment_url} target="_blank" rel="noopener noreferrer" download={task.attachment_name}>
+              <Button type="primary" size="small">下载</Button>
+            </a>
+          </div>
+        </Card>
+      )}
+
       {aiDraft && (
         <Card className="glass-card" style={{ marginBottom: 16, border: '1px solid #f59e0b' }}>
           <h3 style={{ fontSize: '1rem', marginBottom: 8, color: '#f59e0b' }}>AI 审阅建议</h3>
