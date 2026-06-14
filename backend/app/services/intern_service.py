@@ -47,6 +47,8 @@ def get_intern(intern_id: str) -> dict | None:
                     "id": c.id, "week": c.week, "progress": c.progress,
                     "blockers": c.blockers, "emotion_capsule": c.emotion_capsule.value,
                     "next_plan": c.next_plan, "submitted_at": c.submitted_at.isoformat(),
+                    "attachment_url": c.attachment_url,
+                    "attachment_name": c.attachment_name,
                 }
                 for c in recent_checkins
             ],

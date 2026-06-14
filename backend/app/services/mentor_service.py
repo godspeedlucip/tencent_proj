@@ -160,6 +160,8 @@ def get_pending_reviews(mentor_id: str) -> dict:
                     "intern_name": t.intern.name if t.intern else "",
                     "report_md": t.report_md,
                     "report_submitted_at": t.report_submitted_at.isoformat() if t.report_submitted_at else None,
+                    "attachment_url": t.attachment_url,
+                    "attachment_name": t.attachment_name,
                 }
                 for t in tasks
             ]

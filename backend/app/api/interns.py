@@ -66,6 +66,8 @@ def get_intern_tasks(intern_id: str):
              "description": t.description,
              "approval_status": t.approval_status.value if t.approval_status else "pending",
              "report_md": t.report_md,
+             "attachment_url": t.attachment_url,
+             "attachment_name": t.attachment_name,
              "score": t.score}
             for t in tasks
         ]}
@@ -98,6 +100,8 @@ def get_intern_checkins(intern_id: str, week: int | None = Query(None)):
                 ).count() > 0,
                 "weekly_report_md": c.weekly_report_md,
                 "is_late": compute_is_late(c.submitted_at, mentor_id),
+                "attachment_url": c.attachment_url,
+                "attachment_name": c.attachment_name,
             }
             for c in checkins
         ]}

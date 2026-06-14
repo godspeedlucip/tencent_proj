@@ -223,6 +223,8 @@ def get_intern_tasks_for_mentor(mentor_id: str, intern_id: str):
                 "status": t.status.value, "due_date": t.due_date.isoformat() if t.due_date else None,
                 "score": t.score, "approval_status": t.approval_status.value if t.approval_status else "pending",
                 "report_md": t.report_md,
+                "attachment_url": t.attachment_url,
+                "attachment_name": t.attachment_name,
             }
             for t in tasks
         ]}
@@ -250,6 +252,8 @@ def get_intern_checkins_for_mentor(mentor_id: str, intern_id: str):
                 "mentor_score": c.mentor_score, "mentor_comment": c.mentor_comment,
                 "submitted_at": c.submitted_at.isoformat(),
                 "is_late": compute_is_late(c.submitted_at, mentor_id),
+                "attachment_url": c.attachment_url,
+                "attachment_name": c.attachment_name,
             }
             for c in checkins
         ]}
