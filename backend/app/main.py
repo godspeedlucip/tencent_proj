@@ -9,7 +9,11 @@ app = FastAPI(title="实习能量站 API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://106.55.137.53"],
+    allow_origins=[
+        "http://106.55.137.53",
+        "http://106.55.137.53:8080",
+        "http://localhost:8080",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
