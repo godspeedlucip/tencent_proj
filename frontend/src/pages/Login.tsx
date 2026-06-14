@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import { auth } from '../services/api'
 import { useRole } from '../contexts/RoleContext'
 
-const GITHUB_URL = 'https://github.com/your-repo'
-const DEMO_VIDEO_URL = 'https://your-oss.aliyuncs.com/demo.mp4'
+const GITHUB_URL = import.meta.env.VITE_GITHUB_URL || 'https://github.com/your-repo'
+const DEMO_VIDEO_URL = import.meta.env.VITE_DEMO_VIDEO_URL || 'https://your-oss.aliyuncs.com/demo.mp4'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
