@@ -50,6 +50,8 @@ class Task(Base):
     annotation_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
     approval_status: Mapped[ApprovalStatus | None] = mapped_column(SAEnum(ApprovalStatus), default=ApprovalStatus.pending, nullable=True)
     rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    attachment_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    attachment_name: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     intern: Mapped["Intern"] = relationship(back_populates="tasks")

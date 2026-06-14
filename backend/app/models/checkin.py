@@ -28,6 +28,8 @@ class CheckIn(Base):
     mentor_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
     mentor_comment: Mapped[str | None] = mapped_column(Text, nullable=True)
     next_plan: Mapped[str | None] = mapped_column(Text, nullable=True)
+    attachment_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    attachment_name: Mapped[str | None] = mapped_column(Text, nullable=True)
     submitted_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     intern: Mapped["Intern"] = relationship(back_populates="checkins")
