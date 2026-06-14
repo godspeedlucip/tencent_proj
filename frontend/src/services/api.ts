@@ -1,6 +1,7 @@
 import type { Intern, CheckIn, Task, MentorFeedback, TalkingPoints, AIDailyTip, HRDashboard, WeeklyReport, RiskSignal, FitReport, Notification, AnalyticsData, MentorPerformance, DeadlineConfig, MentorInternTask, MentorInternCheckin, MentorSummary, HRIntern } from '../types'
 
 const BASE = import.meta.env.VITE_API_BASE || '/api/v1'
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || ''
 
 function getToken(): string | null {
   return sessionStorage.getItem('token')
@@ -21,7 +22,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       sessionStorage.removeItem('token')
       sessionStorage.removeItem('role')
       sessionStorage.removeItem('user')
-      window.location.href = '/login'
+      window.location.href = `${BASE_PATH}/login`
       throw new Error('Session expired')
     }
     const body = await res.json().catch(() => ({}))
