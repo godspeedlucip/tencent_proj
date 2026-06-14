@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { Form, Input, Button, message } from 'antd'
-import { UserOutlined, LockOutlined } from '@ant-design/icons'
+import { UserOutlined, LockOutlined, GithubOutlined, PlayCircleOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { auth } from '../services/api'
 import { useRole } from '../contexts/RoleContext'
+
+const GITHUB_URL = import.meta.env.VITE_GITHUB_URL || 'https://github.com/your-repo'
+const DEMO_VIDEO_URL = import.meta.env.VITE_DEMO_VIDEO_URL || 'https://your-oss.aliyuncs.com/demo.mp4'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
@@ -85,6 +88,54 @@ export default function LoginPage() {
         }}>
           测试账号：intern1 / mentor1 / hr1 / recruiter1 / 密码均 pass123
         </p>
+      </div>
+
+      <div style={{
+        position: 'relative',
+        zIndex: 2,
+        display: 'flex',
+        justifyContent: 'center',
+        gap: 32,
+        marginTop: 24,
+      }}>
+        <a
+          href={GITHUB_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: '#334155',
+            fontSize: '0.9rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            textDecoration: 'none',
+            transition: 'color 0.2s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#f59e0b')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#334155')}
+        >
+          <GithubOutlined />
+          GitHub 代码
+        </a>
+        <a
+          href={DEMO_VIDEO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: '#334155',
+            fontSize: '0.9rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            textDecoration: 'none',
+            transition: 'color 0.2s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#f59e0b')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#334155')}
+        >
+          <PlayCircleOutlined />
+          演示视频
+        </a>
       </div>
     </div>
   )
