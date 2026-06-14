@@ -1,0 +1,16 @@
+services:
+  backend:
+    build: .
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
