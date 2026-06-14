@@ -255,6 +255,8 @@ export interface MentorInternCheckin {
   mentor_comment: string | null
   submitted_at: string
   is_late: boolean
+  attachment_url?: string | null
+  attachment_name?: string | null
 }
 
 export interface MentorSummary {
