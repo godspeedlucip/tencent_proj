@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Table, Spin, Alert, Skeleton } from 'antd'
 import { MessageOutlined, EyeOutlined, EditOutlined, FileTextOutlined, StarOutlined, FormOutlined } from '@ant-design/icons'
 import { mentors } from '../../services/api'
@@ -19,6 +20,7 @@ const statusStyle: Record<string, { bg: string; border: string; color: string; l
 }
 
 export default function MentorDashboard({ user }: Props) {
+  const navigate = useNavigate()
   const [interns, setInterns] = useState<Intern[]>([])
   const [loading, setLoading] = useState(true)
   const [feedbackIntern, setFeedbackIntern] = useState<Intern | null>(null)
@@ -68,7 +70,7 @@ export default function MentorDashboard({ user }: Props) {
             </button>
           )}
           <button className="btn-link" onClick={() => {
-            window.location.href = `/mentor/assign?intern_id=${record.id}&intern_name=${encodeURIComponent(record.name)}`
+            navigate(`/mentor/assign?intern_id=${record.id}&intern_name=${encodeURIComponent(record.name)}`)
           }} title="布置任务">
             <EditOutlined /> 布置
           </button>
