@@ -73,7 +73,7 @@ function AppShell() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/aihr">
       <RoleProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />

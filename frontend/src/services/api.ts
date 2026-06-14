@@ -1,6 +1,6 @@
 import type { Intern, CheckIn, Task, MentorFeedback, TalkingPoints, AIDailyTip, HRDashboard, WeeklyReport, RiskSignal, FitReport, Notification, AnalyticsData, MentorPerformance, DeadlineConfig, MentorInternTask, MentorInternCheckin, MentorSummary, HRIntern } from '../types'
 
-const BASE = '/api/v1'
+const BASE = import.meta.env.VITE_API_BASE || '/api/v1'
 
 function getToken(): string | null {
   return sessionStorage.getItem('token')
