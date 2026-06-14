@@ -69,6 +69,8 @@ def submit_checkin(intern_id: str, data: dict) -> dict:
             mapped_stress_score=stress,
             weekly_report_md=data.get("weekly_report_md"),
             next_plan=data.get("next_plan"),
+            attachment_url=data.get("attachment_url"),
+            attachment_name=data.get("attachment_name"),
         )
         db.add(checkin)
         db.commit()
@@ -177,7 +179,7 @@ def get_growth_timeline(intern_id: str) -> dict:
         db.close()
 
 
-def submit_task_report(intern_id: str, task_id: str, report_md: str) -> dict:
+def submit_task_report(intern_id: str, task_id: str, report_md: str, attachment_url: str | None = None, attachment_name: str | None = None) -> dict:
     db = SessionLocal()
     try:
         task = db.query(Task).filter(Task.id == task_id, Task.intern_id == intern_id).first()
@@ -186,6 +188,8 @@ def submit_task_report(intern_id: str, task_id: str, report_md: str) -> dict:
         task.report_md = report_md
         task.report_submitted_at = datetime.utcnow()
         task.approval_status = ApprovalStatus.pending
+        task.attachment_url = attachment_url
+        task.attachment_name = attachment_name
         db.commit()
 
         intern = db.query(Intern).filter(Intern.id == intern_id).first()
