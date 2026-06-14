@@ -1,7 +1,7 @@
 """Alibaba Cloud OSS upload utility."""
 
 import os
-import uuid
+from datetime import datetime
 import oss2
 
 
@@ -28,7 +28,9 @@ def upload_file(file_content: bytes, original_filename: str, content_type: str) 
         Tuple of (public_url, original_filename).
     """
     ext = original_filename.rsplit(".", 1)[-1] if "." in original_filename else "bin"
-    object_name = f"uploads/{uuid.uuid4()}.{ext}"
+    now = datetime.now()
+    ts = now.strftime('%Y%m%d%H%M%S') + now.strftime('%f')[:3]
+    object_name = f"uploads/{now.strftime('%Y/%m')}/{ts}.{ext}"
     bucket = _get_bucket()
     endpoint = os.getenv("OSS_ENDPOINT", "")
     bucket_name = os.getenv("OSS_BUCKET", "")
