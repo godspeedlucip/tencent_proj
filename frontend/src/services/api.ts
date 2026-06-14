@@ -31,6 +31,29 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json()
 }
 
+async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
+  const token = getToken()
+  const res = await fetch(`${BASE}${path}`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  })
+  if (!res.ok) {
+    if (res.status === 401) {
+      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('role')
+      sessionStorage.removeItem('user')
+      window.location.href = `${BASE_PATH}/login`
+      throw new Error('Session expired')
+    }
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body?.detail || `HTTP ${res.status}`)
+  }
+  return res.json()
+}
+
 // Auth
 export const auth = {
   login: (username: string, password: string) =>
@@ -58,8 +81,15 @@ export const interns = {
     request<{ id: string }>(`/interns/${id}/checkins`, { method: 'POST', body: JSON.stringify(data) }),
   submitBaseline: (id: string, scores: Record<string, number>) =>
     request<{ id: string; status: string }>(`/interns/${id}/baseline`, { method: 'POST', body: JSON.stringify({ scores }) }),
-  submitTaskReport: (internId: string, taskId: string, reportMd: string) =>
-    request<{ id: string; status: string }>(`/interns/${internId}/tasks/${taskId}/report`, { method: 'POST', body: JSON.stringify({ report_md: reportMd }) }),
+  submitTaskReport: (internId: string, taskId: string, reportMd: string, attachmentUrl?: string | null, attachmentName?: string | null) =>
+    request<{ id: string; status: string }>(`/interns/${internId}/tasks/${taskId}/report`, {
+      method: 'POST',
+      body: JSON.stringify({
+        report_md: reportMd,
+        attachment_url: attachmentUrl || null,
+        attachment_name: attachmentName || null,
+      }),
+    }),
   getGrowthTimeline: (id: string) => request<import('../types').GrowthTimeline>(`/interns/${id}/growth-timeline`),
 }
 
@@ -143,4 +173,13 @@ export const ai = {
   getDailyTip: (internId: string) => request<AIDailyTip>(`/ai/daily-tip/${internId}`),
   getReviewDraft: (taskId: string) =>
     request<{ draft: { highlights: string[]; suggestions: string[]; suggested_score: number }; source: string }>(`/ai/review-draft/${taskId}`, { method: 'POST' }),
+}
+
+// Upload
+export const upload = {
+  file: (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return uploadRequest<{ url: string; name: string }>('/upload', formData)
+  },
 }

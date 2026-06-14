@@ -40,6 +40,8 @@ export interface Task {
   approval_status?: string
   report_md?: string | null
   score?: number | null
+  attachment_url?: string | null
+  attachment_name?: string | null
 }
 
 export type EmotionCapsule = 'energetic' | 'steady' | 'blocked' | 'overloaded' | 'motivated'
@@ -54,6 +56,8 @@ export interface CheckIn {
   next_plan: string | null
   submitted_at: string
   has_feedback?: boolean
+  attachment_url?: string | null
+  attachment_name?: string | null
 }
 
 export interface MentorFeedback {
