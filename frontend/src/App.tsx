@@ -73,7 +73,7 @@ function AppShell() {
 
 export default function App() {
   return (
-    <BrowserRouter basename="/aihr">
+    <BrowserRouter basename={import.meta.env.VITE_BASE_PATH || ''}>
       <RoleProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
