@@ -4,6 +4,11 @@ services:
     volumes:
       - ./backend:/app
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/docs')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   nginx:
     build:
@@ -12,5 +17,6 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
